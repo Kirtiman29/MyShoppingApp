@@ -35,6 +35,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
@@ -43,6 +44,7 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.myshoppingapp.domain.models.Category
+import com.example.myshoppingapp.domain.models.Product
 import dagger.hilt.android.lifecycle.HiltViewModel
 
 
@@ -51,6 +53,8 @@ fun HomeScreen(
     viewModel: MyViewModel = hiltViewModel()
 ) {
     val state = viewModel.getAllCategoryState.collectAsState()
+
+    val productState = viewModel.getAllProductState.collectAsState()
 
     LaunchedEffect(key1 = Unit) {
         viewModel.getAllCategory()
@@ -162,8 +166,8 @@ fun HomeScreen(
         }
 
         LazyRow {
-            items(state.value.data) {
-                ProductItem()
+            items(productState.value.data) {
+                ProductItem(product = it)
             }
 
 
@@ -176,7 +180,7 @@ fun HomeScreen(
 
 
 @Composable
-fun ProductItem() {
+fun ProductItem(product: Product) {
 
     Row(
         modifier = Modifier
@@ -190,15 +194,15 @@ fun ProductItem() {
                 .padding(25.dp)
 
         ) {
-//            AsyncImage(
-//                model = product.imageUrl,
-//                contentDescription = product.name,
-//                modifier = Modifier
-//                    .fillMaxWidth()
-//                    .height(180.dp)
-//                    .clip(RoundedCornerShape(8.dp)),
-//                contentScale = ContentScale.Crop
-//            )
+            AsyncImage(
+                model = product.imageUri,
+                contentDescription = product.name,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(180.dp)
+                    .clip(RoundedCornerShape(8.dp)),
+                contentScale = ContentScale.Crop
+            )
             Text(text = "image")
             Spacer(modifier = Modifier.height(8.dp))
 
@@ -219,6 +223,16 @@ fun ProductItem() {
 
     }
 
+}
+
+@Composable
+fun AsyncImage(
+    model: String,
+    contentDescription: String,
+    modifier: Modifier,
+    contentScale: ContentScale
+) {
+    TODO("Not yet implemented")
 }
 
 @Composable
