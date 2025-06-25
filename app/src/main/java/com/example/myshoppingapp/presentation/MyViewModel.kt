@@ -5,8 +5,10 @@ import androidx.lifecycle.viewModelScope
 import com.example.myshoppingapp.common.State
 import com.example.myshoppingapp.domain.models.Category
 import com.example.myshoppingapp.domain.models.Product
+import com.example.myshoppingapp.domain.models.userData
 import com.example.myshoppingapp.domain.useCase.GetAllCategoryUseCase
 import com.example.myshoppingapp.domain.useCase.GetAllProductUseCase
+import com.example.myshoppingapp.domain.useCase.UserRegisterWithEmailAndPasswordUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -19,7 +21,8 @@ import javax.inject.Inject
 class MyViewModel
     @Inject constructor(
         private val GetAllCategory: GetAllCategoryUseCase,
-        private val GetAllProduct: GetAllProductUseCase
+        private val GetAllProduct: GetAllProductUseCase,
+        private val userRegisterWithEmailAndPasswordUseCase: UserRegisterWithEmailAndPasswordUseCase
     ): ViewModel() {
 
         val _getAllCategoryState = MutableStateFlow(GetAllCategoryState())
@@ -28,6 +31,28 @@ class MyViewModel
     val _getAllProductState = MutableStateFlow(GetAllProductState())
 
     val getAllProductState = _getAllProductState.asStateFlow()
+    val _userRegisterState = MutableStateFlow(UserRegisterState())
+    val userRegisterState = _userRegisterState.asStateFlow()
+
+
+
+    fun registerUser(userData: userData){
+        viewModelScope.launch {
+            userRegisterWithEmailAndPasswordUseCase.userRegisterWithEmailAndPasswordUseCase(userData).collectLatest {
+                when(it){
+                    is State.Success -> {
+                        _userRegisterState.value = UserRegisterState(userData = it.data)
+                    }
+                    is State.Error -> {
+                        _userRegisterState.value = UserRegisterState(error = it.error)
+                    }
+                    is State.Loading -> {
+                        _userRegisterState.value = UserRegisterState(isLoading = true)
+                    }
+                }
+            }
+        }
+    }
 
 
     fun getAllProduct(){
@@ -83,4 +108,11 @@ data class GetAllProductState(
     val error: String = "",
     val isLoading: Boolean = false,
     val data: List<Product> = emptyList()
+)
+
+data class UserRegisterState(
+    val error: String = "",
+    val isLoading: Boolean = false,
+    val userData: String? = null
+
 )

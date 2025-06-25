@@ -2,6 +2,7 @@ package com.example.myshoppingapp.presentation
 
 import com.example.myshoppingapp.data.repoimple.repoimple
 import com.example.myshoppingapp.domain.repo.repo
+import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import dagger.Module
 import dagger.Provides
@@ -16,9 +17,10 @@ object UIModels {
     @Provides
 
     fun provideRepo(
-        firebaseFirestore: FirebaseFirestore
+        firebaseFirestore: FirebaseFirestore,
+        firebaseAuth: FirebaseAuth
     ): repo {
-        return repoimple(firebaseFirestore)
+        return repoimple(firebaseFirestore,firebaseAuth)
 
     }
 }
