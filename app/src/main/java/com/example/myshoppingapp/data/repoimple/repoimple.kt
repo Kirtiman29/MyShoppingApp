@@ -3,6 +3,7 @@ package com.example.myshoppingapp.data.repoimple
 import com.example.myshoppingapp.common.CATEGORY
 import com.example.myshoppingapp.common.Products
 import com.example.myshoppingapp.common.State
+import com.example.myshoppingapp.common.USERS
 import com.example.myshoppingapp.domain.models.Category
 import com.example.myshoppingapp.domain.models.Product
 import com.example.myshoppingapp.domain.models.userData
@@ -85,6 +86,34 @@ class repoimple
             close()
         }
 
+    }
+
+    override fun getUserData(): Flow<State<List<userData>>> = callbackFlow {
+        trySend(State.Loading)
+
+       // val userId = firebaseAuth.currentUser?.uid
+        val userId = "xWtIXU4WCxgVPlTKXNB3PfHr2Qj1"
+        if (userId == null) {
+            trySend(State.Error("User not logged in"))
+            close() // Close the flow since we can't continue
+            return@callbackFlow
+        }
+
+        firebaseFirestore.collection(USERS).document(userId)
+            .get()
+            .addOnSuccessListener {
+                val data = it.toObject(userData::class.java)
+                if (data != null) {
+                    trySend(State.Success(listOf(data))) // wrap in list for backward compatibility
+                } else {
+                    trySend(State.Error("User data not found"))
+                }
+            }
+            .addOnFailureListener {
+                trySend(State.Error(it.localizedMessage ?: "Unknown error"))
+            }
+
+        awaitClose { close() }
     }
 
 }

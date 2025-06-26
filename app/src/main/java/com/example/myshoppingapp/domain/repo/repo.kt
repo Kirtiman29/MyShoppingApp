@@ -13,4 +13,6 @@ interface repo {
     fun getAllProducts(): Flow<State<List<Product>>>
 
     fun userRegisterWithEmailAndPassword(userData: userData): Flow<State<String>>
+
+    fun getUserData() : Flow<State<List<userData>>>
 }
