@@ -88,6 +88,24 @@ class repoimple
 
     }
 
+    override fun userLoginWithEmailAndPassword(
+        userEmail: String,
+        userPassword: String
+    ): Flow<State<String>> = callbackFlow {
+        trySend(State.Loading)
+        firebaseAuth.signInWithEmailAndPassword(userEmail, userPassword)
+            .addOnSuccessListener {
+                trySend(State.Success("User Login Successfully"))
+            }
+            .addOnFailureListener {
+                trySend(State.Error(it.toString()))
+            }
+        awaitClose {
+            close()
+            }
+
+    }
+
     override fun getUserData(): Flow<State<List<userData>>> = callbackFlow {
         trySend(State.Loading)
 

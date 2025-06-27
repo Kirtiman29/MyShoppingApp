@@ -1,5 +1,6 @@
 package com.example.myshoppingapp.presentation
 
+import android.widget.Toast
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -20,12 +21,14 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonColors
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -34,6 +37,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
@@ -43,6 +47,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.myshoppingapp.R
 
 
@@ -77,10 +82,35 @@ fun LoginScreen() {
 
 
 @Composable
-fun LoginContent() {
+fun LoginContent(
+    viewModel: MyViewModel = hiltViewModel()
+) {
 
+
+    val loginState = viewModel.loginState.collectAsState()
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
+    val context = LocalContext.current
+
+
+    when{
+        loginState.value.isLoading -> {
+            Box(
+                modifier = Modifier.fillMaxSize(),
+            ){
+                CircularProgressIndicator(
+                    modifier = Modifier.align(Alignment.Center)
+                )
+            }
+        }
+        loginState.value.error.isNotEmpty() -> {
+            Toast.makeText(context, loginState.value.error, Toast.LENGTH_SHORT).show()
+        }
+        loginState.value.data != null -> {
+            Toast.makeText(context, "Login Successful", Toast.LENGTH_SHORT).show()
+        }
+
+    }
 
     Column(
         modifier = Modifier
@@ -173,7 +203,12 @@ fun LoginContent() {
         Spacer(modifier = Modifier.height(40.dp))
 
         Button(
-            onClick = {},
+            onClick = {
+                viewModel.login(
+                    email = email,
+                    password = password
+                )
+            },
             modifier = Modifier
                 .width(317.dp)
                 .height(47.dp),

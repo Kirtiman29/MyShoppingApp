@@ -14,5 +14,7 @@ interface repo {
 
     fun userRegisterWithEmailAndPassword(userData: userData): Flow<State<String>>
 
+    fun userLoginWithEmailAndPassword(userEmail: String , userPassword: String): Flow<State<String>>
+
     fun getUserData() : Flow<State<List<userData>>>
 }

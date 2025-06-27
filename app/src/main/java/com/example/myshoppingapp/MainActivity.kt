@@ -29,8 +29,8 @@ class MainActivity : ComponentActivity() {
             MyShoppingAppTheme {
                 Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
                    // HomeScreen()
-                   // LoginScreen()
-                    SeeMoreScreen()
+                    LoginScreen()
+                   // SeeMoreScreen()
                 }
             }
         }
