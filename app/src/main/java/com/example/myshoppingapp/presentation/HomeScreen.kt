@@ -1,7 +1,11 @@
 package com.example.myshoppingapp.presentation
 
 import android.util.Log
+import android.widget.Toast
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.Canvas
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -35,18 +39,24 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextDecoration
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.navigation.NavController
 import coil.compose.AsyncImage
+import com.example.myshoppingapp.R
 
 
 import com.example.myshoppingapp.domain.models.Category
@@ -55,11 +65,39 @@ import com.example.myshoppingapp.domain.models.Product
 
 @Composable
 fun HomeScreen(
-    viewModel: MyViewModel = hiltViewModel()
+    viewModel: MyViewModel = hiltViewModel(),
+    navController: NavController
 ) {
     val state = viewModel.getAllCategoryState.collectAsState()
 
     val productState = viewModel.getAllProductState.collectAsState()
+    val context = LocalContext.current
+
+
+    when{
+        state.value.isLoading ->{
+            Column(
+                modifier = Modifier.fillMaxSize(),
+                verticalArrangement = Arrangement.Center,
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                CircularProgressIndicator()
+            }
+
+        }
+        state.value.error.isNotBlank() -> {
+            Column(
+                modifier = Modifier.fillMaxSize(),
+                verticalArrangement = Arrangement.Center,
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                Toast.makeText(context, state.value.error, Toast.LENGTH_SHORT).show()
+            }
+        }
+        state.value.data.isNotEmpty() -> {
+            Log.d("TAG", "HomeScreen: ${state.value.data}")
+        }
+    }
 
     LaunchedEffect(key1 = Unit) {
         viewModel.getAllCategory()
@@ -135,7 +173,7 @@ fun HomeScreen(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(25.dp),
-            horizontalArrangement = Arrangement.spacedBy(16.dp)
+            horizontalArrangement = Arrangement.spacedBy(20.dp)
         ) {
             items(state.value.data) {
                 CategoryItem(category = it)
@@ -150,14 +188,21 @@ fun HomeScreen(
                 .fillMaxWidth()
                 .height(150.dp)
         ) {
-            AsyncImage(
-                model = "https://firebasestorage.googleapis.com/v0/b/myshoppingadminapp1.firebasestorage.app/o/Products%2F1750691831469?alt=media&token=b72f6671-04d7-407d-aa57-d88bccaf78df", // Replace with actual URL
-                contentDescription = null,
-                modifier = Modifier
-                    .height(120.dp)
-                    .fillMaxWidth()
-            )
 
+            Column(
+                modifier = Modifier.fillMaxSize(),
+                verticalArrangement = Arrangement.Center,
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                Image(
+                    painter = painterResource(id = R.drawable.banner),
+                    contentDescription = "banner",
+                    modifier = Modifier.fillMaxSize(),
+                    contentScale = ContentScale.Crop
+                )
+
+
+            }
         }
 
         Row(
@@ -181,12 +226,13 @@ fun HomeScreen(
         }
 
         LazyRow(
-            modifier = Modifier.fillMaxWidth()
+            modifier = Modifier
+                .fillMaxWidth()
                 .padding(25.dp),
             horizontalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            items(productState.value.data) {product ->
-                ProductItem(product =  product)
+            items(productState.value.data) { product ->
+                ProductItem(product = product)
             }
 
 
@@ -214,10 +260,9 @@ fun ProductItem(product: Product) {
             colors = CardDefaults.cardColors(containerColor = Color.White),
             elevation = CardDefaults.cardElevation(4.dp)
         ) {
-            if (product.imageUri ==  ""){
+            if (product.imageUri == "") {
                 CircularProgressIndicator()
-            }
-            else{
+            } else {
                 AsyncImage(
                     model = product.imageUri,
                     contentDescription = product.name,
@@ -228,9 +273,6 @@ fun ProductItem(product: Product) {
                 )
 
             }
-
-
-
 
 
         }
@@ -246,21 +288,24 @@ fun ProductItem(product: Product) {
             border = BorderStroke(1.dp, Color(0xFF8C8585)),
         ) {
             Column(
-                modifier = Modifier.fillMaxSize()
+                modifier = Modifier
+                    .fillMaxSize()
                     .padding(10.dp)
             ) {
                 Text(
                     text = product.name,
                     fontSize = 16.sp,
                     color = Color(0xFF8C8585),
-
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
                 )
+
                 Text(
                     text = product.category,
                     fontSize = 16.sp,
                     color = Color(0xFF8C8585),
 
-                )
+                    )
                 Text(
                     text = "Rs: ${product.finalprice}",
                     fontSize = 16.sp,
@@ -318,9 +363,18 @@ fun ProductItem(product: Product) {
 //) {
 //    TODO("Not yet implemented")
 //}
-
 @Composable
 fun CategoryItem(category: Category) {
+
+    // 🔥 Map category.name to drawable
+    val imageRes = when (category.name.lowercase()) {
+        "dresses" -> R.drawable.dresses
+        "tops" -> R.drawable.tops
+        "bottoms" -> R.drawable.bottom
+        "jumpsuits" -> R.drawable.jumpsuits
+        else -> R.drawable.tops // fallback
+    }
+
     Column(
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
@@ -331,13 +385,12 @@ fun CategoryItem(category: Category) {
                 .clip(CircleShape)
                 .border(1.dp, Color(0xFF8C8585), CircleShape)
         ) {
-//            AsyncImage(
-//                model = category.imageUri,
-//                contentDescription = category.name,
-//                modifier = Modifier.size(40.dp),
-//                contentScale = ContentScale.Fit
-//            )
-            Text(text = category.imageUri)
+            Image(
+                painter = painterResource(id = imageRes),
+                contentDescription = category.name,
+                modifier = Modifier.size(40.dp),
+                contentScale = ContentScale.Fit
+            )
         }
         Spacer(modifier = Modifier.height(8.dp))
         Text(
@@ -348,3 +401,6 @@ fun CategoryItem(category: Category) {
         )
     }
 }
+
+
+

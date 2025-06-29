@@ -46,12 +46,15 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.NavController
 import com.example.myshoppingapp.R
 import com.example.myshoppingapp.domain.models.userData
+import com.example.myshoppingapp.presentation.navigation.Routes
 
 @Composable
 fun SignUpScreen(
-    viewModel: MyViewModel = hiltViewModel()
+    viewModel: MyViewModel = hiltViewModel(),
+    navController: NavController
 ) {
 
     val state = viewModel.userRegisterState.collectAsState()
@@ -69,6 +72,8 @@ fun SignUpScreen(
         }
         state.value.userData != null ->{
             Toast.makeText(context, state.value.userData.toString(), Toast.LENGTH_SHORT).show()
+
+            navController.navigate(Routes.HomeScreen)
         }
 
         state.value.error != null ->{

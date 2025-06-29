@@ -32,6 +32,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -48,11 +49,39 @@ import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.navigation.NavController
 import com.example.myshoppingapp.R
+import com.example.myshoppingapp.presentation.navigation.Routes
 
 
 @Composable
-fun LoginScreen() {
+fun LoginScreen(
+    viewModel: MyViewModel = hiltViewModel(),
+    navController: NavController
+) {
+    val loginState = viewModel.loginState.collectAsState()
+    val context = LocalContext.current
+
+    when{
+        loginState.value.isLoading -> {
+            Box(
+                modifier = Modifier.fillMaxSize(),
+            ){
+                CircularProgressIndicator(
+                    modifier = Modifier.align(Alignment.Center)
+                )
+            }
+        }
+        loginState.value.error.isNotEmpty() -> {
+            Toast.makeText(context, loginState.value.error, Toast.LENGTH_SHORT).show()
+        }
+        loginState.value.data != null -> {
+            Toast.makeText(context, "Login Successful", Toast.LENGTH_SHORT).show()
+
+            navController.navigate(Routes.HomeScreen)
+        }
+
+    }
 
     Box(modifier = Modifier.fillMaxSize()) {
 
@@ -87,30 +116,13 @@ fun LoginContent(
 ) {
 
 
-    val loginState = viewModel.loginState.collectAsState()
-    var email by remember { mutableStateOf("") }
-    var password by remember { mutableStateOf("") }
+
+    var email by rememberSaveable { mutableStateOf("") }
+    var password by rememberSaveable { mutableStateOf("") }
     val context = LocalContext.current
 
 
-    when{
-        loginState.value.isLoading -> {
-            Box(
-                modifier = Modifier.fillMaxSize(),
-            ){
-                CircularProgressIndicator(
-                    modifier = Modifier.align(Alignment.Center)
-                )
-            }
-        }
-        loginState.value.error.isNotEmpty() -> {
-            Toast.makeText(context, loginState.value.error, Toast.LENGTH_SHORT).show()
-        }
-        loginState.value.data != null -> {
-            Toast.makeText(context, "Login Successful", Toast.LENGTH_SHORT).show()
-        }
 
-    }
 
     Column(
         modifier = Modifier
@@ -331,7 +343,7 @@ Spacer(modifier = Modifier.height(40.dp))
                // Spacer(modifier = Modifier.width(8.dp))
 
                 Text(
-                    text = "Log in with Facebook",
+                    text = "Log in with Google",
                     fontSize = 15.sp,
                     modifier = Modifier.fillMaxWidth(),
                     textAlign = TextAlign.Center,

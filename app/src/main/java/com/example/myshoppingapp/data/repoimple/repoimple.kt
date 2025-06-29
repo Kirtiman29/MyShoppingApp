@@ -98,7 +98,7 @@ class repoimple
                 trySend(State.Success("User Login Successfully"))
             }
             .addOnFailureListener {
-                trySend(State.Error(it.toString()))
+                trySend(State.Error(it.message.toString()))
             }
         awaitClose {
             close()
