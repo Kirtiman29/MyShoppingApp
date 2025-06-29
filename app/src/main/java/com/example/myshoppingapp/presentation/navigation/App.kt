@@ -7,7 +7,11 @@ import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.ShoppingCart
+import androidx.compose.material.icons.outlined.Favorite
+import androidx.compose.material.icons.outlined.HeartBroken
 import androidx.compose.material.icons.outlined.Home
+import androidx.compose.material.icons.outlined.Person
+import androidx.compose.material.icons.outlined.ShoppingCart
 import androidx.compose.material3.Icon
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
@@ -29,6 +33,7 @@ import androidx.navigation.compose.rememberNavController
 import com.example.myshoppingapp.presentation.HomeScreen
 import com.example.myshoppingapp.presentation.LoginScreen
 import com.example.myshoppingapp.presentation.ProfileScreen
+import com.example.myshoppingapp.presentation.SeeMoreScreen
 import com.example.myshoppingapp.presentation.SignUpScreen
 import com.google.firebase.auth.FirebaseAuth
 import kotlinx.coroutines.coroutineScope
@@ -53,54 +58,61 @@ fun App(
         ),
         BottomNavItems(
             icon = Icons.Filled.Favorite,
-            unselectedIcon = Icons.Filled.Favorite
+            unselectedIcon = Icons.Outlined.Favorite
         ),
         BottomNavItems(
             icon = Icons.Filled.ShoppingCart,
-            unselectedIcon = Icons.Filled.ShoppingCart
+            unselectedIcon = Icons.Outlined.ShoppingCart
         ),
         BottomNavItems(
             icon = Icons.Filled.Person,
-            unselectedIcon = Icons.Filled.Person
+            unselectedIcon = Icons.Outlined.Person
         )
     )
 
     var selectedItemIndex by rememberSaveable { mutableIntStateOf(0) }
 
-    // 🔥 Get current route to decide if we want bottom bar
+    // Get current route to decide if we want bottom bar
     val navBackStackEntry by navController.currentBackStackEntryAsState()
-    val currentDestination = navBackStackEntry?.destination?.route
+    val currentRoute = navBackStackEntry?.destination?.route
 
+    // Define routes where bottom bar should be hidden
+    val bottomBarHiddenRoutes = listOf(
+        Routes.LoginScreen,
+        Routes.SignUpScreen
+    )
+
+    // Check if bottom bar should be visible
+    val isBottomBarVisible = bottomBarHiddenRoutes.none { it == currentRoute }
 
     Scaffold(
         bottomBar = {
-            NavigationBar(
-                containerColor = Color.White, // solid background
-                tonalElevation = 8.dp          // subtle shadow
-            ) {
-                bottomNavItems.forEachIndexed { index, bottomNavItem ->
-                    NavigationBarItem(
-                        selected = selectedItemIndex == index,
-                        onClick = {
-                            selectedItemIndex = index
-                            when (index) {
-                                0 -> navController.navigate(Routes.HomeScreen)
-                                1 -> navController.navigate(Routes.WishListScreen)
-                                2 -> navController.navigate(Routes.CartScreen)
-                                3 -> navController.navigate(Routes.ProfileScreen)
+            if (isBottomBarVisible) {
+                NavigationBar(
+                    containerColor = Color.Transparent,
+                    tonalElevation = 0.dp
+                ) {
+                    bottomNavItems.forEachIndexed { index, bottomNavItem ->
+                        NavigationBarItem(
+                            selected = selectedItemIndex == index,
+                            onClick = {
+                                selectedItemIndex = index
+                                when (index) {
+                                    0 -> navController.navigate(Routes.HomeScreen)
+                                    1 -> navController.navigate(Routes.WishListScreen)
+                                    2 -> navController.navigate(Routes.CartScreen)
+                                    3 -> navController.navigate(Routes.ProfileScreen)
+                                }
+                            },
+                            icon = {
+                                Icon(
+                                    imageVector = bottomNavItem.unselectedIcon,
+                                    contentDescription = null,
+                                    modifier = Modifier.size(30.dp)
+                                )
                             }
-                        },
-                        icon = {
-                            Icon(
-                                imageVector = if (selectedItemIndex == index)
-                                    bottomNavItem.icon
-                                else
-                                    bottomNavItem.unselectedIcon,
-                                contentDescription = null,
-                                modifier = Modifier.size(30.dp) // bigger icon size
-                            )
-                        }
-                    )
+                        )
+                    }
                 }
             }
         }
@@ -126,12 +138,16 @@ fun App(
                 composable<Routes.ProfileScreen> {
                     ProfileScreen(navController = navController)
                 }
+
+                composable<Routes.SeeMoreScreen>{
+                    SeeMoreScreen(navController = navController)
+                }
+
+
             }
         }
     }
-
 }
-
 
 data class BottomNavItems(
 

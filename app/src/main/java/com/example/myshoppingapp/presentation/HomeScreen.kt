@@ -7,6 +7,7 @@ import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -61,6 +62,7 @@ import com.example.myshoppingapp.R
 
 import com.example.myshoppingapp.domain.models.Category
 import com.example.myshoppingapp.domain.models.Product
+import com.example.myshoppingapp.presentation.navigation.Routes
 
 
 @Composable
@@ -111,7 +113,7 @@ fun HomeScreen(
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(top = 35.dp, start = 25.dp, end = 20.dp),
+                .padding( start = 25.dp, end = 20.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
             OutlinedTextField(
@@ -221,14 +223,18 @@ fun HomeScreen(
             Text(
                 text = "See more",
                 fontSize = 13.sp,
-                color = Color(0xFFF68B8B)
+                color = Color(0xFFF68B8B),
+                modifier = Modifier.clickable{
+                    navController.navigate(Routes.SeeMoreScreen)
+
+                }
             )
         }
 
         LazyRow(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(25.dp),
+                .padding(25.dp, top = 10.dp),
             horizontalArrangement = Arrangement.spacedBy(16.dp)
         ) {
             items(productState.value.data) { product ->

@@ -21,11 +21,12 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.navigation.NavController
 import coil.compose.AsyncImage
 import com.example.myshoppingapp.domain.models.Product
 
 @Composable
-fun SeeMoreScreen(viewModel: MyViewModel = hiltViewModel()) {
+fun SeeMoreScreen(viewModel: MyViewModel = hiltViewModel(),navController: NavController) {
     LaunchedEffect(Unit) {
         viewModel.getAllProduct()
     }
@@ -54,7 +55,7 @@ fun SeeMoreContent(viewModel: MyViewModel = hiltViewModel()) {
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .padding(horizontal = 21.dp, vertical = 63.dp)
+            .padding(horizontal = 21.dp, )
     ) {
         Text(
             text = "See More",
@@ -83,7 +84,7 @@ fun SeeMoreContent(viewModel: MyViewModel = hiltViewModel()) {
             Text(
                 text = "Price",
                 fontSize = 13.sp,
-                modifier = Modifier.padding(end = 150.dp),
+                modifier = Modifier.padding(end = 200.dp),
                 color = Color(0xFF5C5757)
             )
         }
@@ -117,14 +118,14 @@ fun SeeMoreContent(viewModel: MyViewModel = hiltViewModel()) {
                 .height(60.dp)
         )
 
-        Spacer(modifier = Modifier.height(40.dp))
+        Spacer(modifier = Modifier.height(30.dp))
 
         Divider(
             color = Color(0xFF5C5757),
             thickness = 1.dp,
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(end = 45.dp)
+                .padding(end = 30.dp)
         )
 
         Spacer(modifier = Modifier.height(20.dp))

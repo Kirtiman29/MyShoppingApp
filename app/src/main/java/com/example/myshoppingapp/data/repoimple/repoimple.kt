@@ -109,8 +109,8 @@ class repoimple
     override fun getUserData(): Flow<State<List<userData>>> = callbackFlow {
         trySend(State.Loading)
 
-       // val userId = firebaseAuth.currentUser?.uid
-        val userId = "xWtIXU4WCxgVPlTKXNB3PfHr2Qj1"
+       val userId = firebaseAuth.currentUser?.uid
+
         if (userId == null) {
             trySend(State.Error("User not logged in"))
             close() // Close the flow since we can't continue
