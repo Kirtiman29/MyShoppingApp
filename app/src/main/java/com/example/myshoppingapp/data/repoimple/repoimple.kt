@@ -1,5 +1,6 @@
 package com.example.myshoppingapp.data.repoimple
 
+import android.util.Log
 import com.example.myshoppingapp.common.CATEGORY
 import com.example.myshoppingapp.common.Products
 import com.example.myshoppingapp.common.State
@@ -133,5 +134,28 @@ class repoimple
 
         awaitClose { close() }
     }
+
+
+    override fun getProductById(productId: String): Flow<State<Product>> = callbackFlow {
+        trySend(State.Loading)
+
+        firebaseFirestore.collection("Products")
+            .whereEqualTo("id", productId) // 🔥 query by field 'id'
+            .get()
+            .addOnSuccessListener { querySnapshot ->
+                val product = querySnapshot.documents.firstOrNull()?.toObject(Product::class.java)
+                if (product != null) {
+                    trySend(State.Success(product))
+                } else {
+                    trySend(State.Error("No product found with id: $productId"))
+                }
+            }
+            .addOnFailureListener {
+                trySend(State.Error(it.message.toString()))
+            }
+
+        awaitClose { close() }
+    }
+
 
 }

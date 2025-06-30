@@ -8,6 +8,7 @@ import com.example.myshoppingapp.domain.models.Product
 import com.example.myshoppingapp.domain.models.userData
 import com.example.myshoppingapp.domain.useCase.GetAllCategoryUseCase
 import com.example.myshoppingapp.domain.useCase.GetAllProductUseCase
+import com.example.myshoppingapp.domain.useCase.GetProductByIdUseCase
 import com.example.myshoppingapp.domain.useCase.GetUserDataUseCase
 import com.example.myshoppingapp.domain.useCase.UserLoginWithEmailAndPasswordUseCase
 import com.example.myshoppingapp.domain.useCase.UserRegisterWithEmailAndPasswordUseCase
@@ -26,7 +27,8 @@ class MyViewModel
     private val GetAllProduct: GetAllProductUseCase,
     private val userRegisterWithEmailAndPasswordUseCase: UserRegisterWithEmailAndPasswordUseCase,
     private val getUserDataUseCase: GetUserDataUseCase,
-    private val userLoginWithEmailAndPasswordUseCase: UserLoginWithEmailAndPasswordUseCase
+    private val userLoginWithEmailAndPasswordUseCase: UserLoginWithEmailAndPasswordUseCase,
+    private val getProductByIdUseCase: GetProductByIdUseCase
 ) : ViewModel() {
 
     val _getAllCategoryState = MutableStateFlow(GetAllCategoryState())
@@ -46,6 +48,32 @@ class MyViewModel
     val loginState = _loginState.asStateFlow()
 
 
+    val _getProductByIdState = MutableStateFlow(GetProductByIdState())
+    val getProductByIdState = _getProductByIdState.asStateFlow()
+
+
+    fun getProductById(productId: String) {
+
+        viewModelScope.launch {
+            getProductByIdUseCase.getProductByIdUseCase(productId = productId).collectLatest {
+                when (it) {
+                    is State.Success -> {
+                        _getProductByIdState.value = GetProductByIdState(data = it.data)
+                    }
+
+                    is State.Error -> {
+                        _getProductByIdState.value = GetProductByIdState(error = it.error)
+                    }
+
+                    is State.Loading -> {
+                        _getProductByIdState.value = GetProductByIdState(isLoading = true)
+                    }
+                }
+            }
+        }
+    }
+
+
     fun login(email: String, password: String) {
         viewModelScope.launch {
             userLoginWithEmailAndPasswordUseCase.userLoginWithEmailAndPasswordUseCase(
@@ -56,9 +84,11 @@ class MyViewModel
                     is State.Success -> {
                         _loginState.value = LoginState(data = it.data)
                     }
+
                     is State.Error -> {
                         _loginState.value = LoginState(error = it.error)
                     }
+
                     is State.Loading -> {
                         _loginState.value = LoginState(isLoading = true)
                     }
@@ -191,5 +221,12 @@ data class LoginState(
     val error: String = "",
     val isLoading: Boolean = false,
     val data: String? = null
+
+)
+
+data class GetProductByIdState(
+    val error: String = "",
+    val isLoading: Boolean = false,
+    val data: Product? = null
 
 )

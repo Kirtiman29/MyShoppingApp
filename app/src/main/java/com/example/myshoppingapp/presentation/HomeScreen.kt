@@ -238,7 +238,7 @@ fun HomeScreen(
             horizontalArrangement = Arrangement.spacedBy(16.dp)
         ) {
             items(productState.value.data) { product ->
-                ProductItem(product = product)
+                ProductItem(product = product,navController)
             }
 
 
@@ -251,10 +251,13 @@ fun HomeScreen(
 
 
 @Composable
-fun ProductItem(product: Product) {
+fun ProductItem(product: Product,navController: NavController) {
 
     Column(
         modifier = Modifier.fillMaxWidth()
+            .clickable{
+                navController.navigate(Routes.EachProductDetailScreen(productId = product.id))
+            }
 
     ) {
 

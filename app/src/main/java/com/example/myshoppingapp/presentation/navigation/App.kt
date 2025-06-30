@@ -30,6 +30,8 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.navigation
 import androidx.navigation.compose.rememberNavController
+import androidx.navigation.toRoute
+import com.example.myshoppingapp.presentation.EachProductDetailScreen
 import com.example.myshoppingapp.presentation.HomeScreen
 import com.example.myshoppingapp.presentation.LoginScreen
 import com.example.myshoppingapp.presentation.ProfileScreen
@@ -141,6 +143,15 @@ fun App(
 
                 composable<Routes.SeeMoreScreen>{
                     SeeMoreScreen(navController = navController)
+                }
+
+                composable<Routes.EachProductDetailScreen>{
+                    val data = it.toRoute<Routes.EachProductDetailScreen>()
+                    EachProductDetailScreen(
+                        navController = navController,
+                        productID = data.productId
+                    )
+
                 }
 
 

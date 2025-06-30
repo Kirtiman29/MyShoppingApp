@@ -17,4 +17,6 @@ interface repo {
     fun userLoginWithEmailAndPassword(userEmail: String , userPassword: String): Flow<State<String>>
 
     fun getUserData() : Flow<State<List<userData>>>
+
+    fun  getProductById(productId: String): Flow<State<Product>>
 }
