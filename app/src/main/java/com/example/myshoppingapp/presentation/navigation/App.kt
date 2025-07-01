@@ -8,6 +8,7 @@ import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.ShoppingCart
 import androidx.compose.material.icons.outlined.Favorite
+import androidx.compose.material.icons.outlined.FavoriteBorder
 import androidx.compose.material.icons.outlined.HeartBroken
 import androidx.compose.material.icons.outlined.Home
 import androidx.compose.material.icons.outlined.Person
@@ -47,7 +48,7 @@ fun App(
     firebaseAuth: FirebaseAuth
 ) {
     val navController = rememberNavController()
-    var startScreen = if (firebaseAuth.currentUser == null) {
+    val startScreen = if (firebaseAuth.currentUser == null) {
         SubNavigation.LoginSignUpScreen
     } else {
         SubNavigation.MainHomeScreen
@@ -60,7 +61,7 @@ fun App(
         ),
         BottomNavItems(
             icon = Icons.Filled.Favorite,
-            unselectedIcon = Icons.Outlined.Favorite
+            unselectedIcon = Icons.Outlined.FavoriteBorder
         ),
         BottomNavItems(
             icon = Icons.Filled.ShoppingCart,
