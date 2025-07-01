@@ -10,6 +10,8 @@ import com.example.myshoppingapp.domain.useCase.GetAllCategoryUseCase
 import com.example.myshoppingapp.domain.useCase.GetAllProductUseCase
 import com.example.myshoppingapp.domain.useCase.GetProductByIdUseCase
 import com.example.myshoppingapp.domain.useCase.GetUserDataUseCase
+import com.example.myshoppingapp.domain.useCase.UpdateUserDataUseCase
+import com.example.myshoppingapp.domain.useCase.UploadUserImageUseCase
 import com.example.myshoppingapp.domain.useCase.UserLoginWithEmailAndPasswordUseCase
 import com.example.myshoppingapp.domain.useCase.UserRegisterWithEmailAndPasswordUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -28,7 +30,9 @@ class MyViewModel
     private val userRegisterWithEmailAndPasswordUseCase: UserRegisterWithEmailAndPasswordUseCase,
     private val getUserDataUseCase: GetUserDataUseCase,
     private val userLoginWithEmailAndPasswordUseCase: UserLoginWithEmailAndPasswordUseCase,
-    private val getProductByIdUseCase: GetProductByIdUseCase
+    private val getProductByIdUseCase: GetProductByIdUseCase,
+    private val updateUserDataUseCase: UpdateUserDataUseCase,
+    private val uploadUserImageUseCase: UploadUserImageUseCase
 ) : ViewModel() {
 
     val _getAllCategoryState = MutableStateFlow(GetAllCategoryState())
@@ -50,6 +54,12 @@ class MyViewModel
 
     val _getProductByIdState = MutableStateFlow(GetProductByIdState())
     val getProductByIdState = _getProductByIdState.asStateFlow()
+
+    val _updateUserDataState = MutableStateFlow(UpdateUserDataState())
+    val updateUserDataState = _updateUserDataState.asStateFlow()
+
+    val _uploadUserImageState = MutableStateFlow(UploadUserImageState())
+    val uploadUserImageState = _uploadUserImageState.asStateFlow()
 
 
     fun getProductById(productId: String) {
@@ -228,5 +238,18 @@ data class GetProductByIdState(
     val error: String = "",
     val isLoading: Boolean = false,
     val data: Product? = null
+
+)
+
+data class UpdateUserDataState(
+    val error: String = "",
+    val isLoading: Boolean = false,
+    val data: String? = null
+)
+
+data class UploadUserImageState(
+    val error: String = "",
+    val isLoading: Boolean = false,
+    val data: String? = null
 
 )

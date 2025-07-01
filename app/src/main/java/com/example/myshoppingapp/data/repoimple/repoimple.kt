@@ -1,6 +1,6 @@
 package com.example.myshoppingapp.data.repoimple
 
-import android.util.Log
+import android.net.Uri
 import com.example.myshoppingapp.common.CATEGORY
 import com.example.myshoppingapp.common.Products
 import com.example.myshoppingapp.common.State
@@ -11,6 +11,7 @@ import com.example.myshoppingapp.domain.models.userData
 import com.example.myshoppingapp.domain.repo.repo
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.storage.FirebaseStorage
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.callbackFlow
@@ -19,7 +20,8 @@ import javax.inject.Inject
 class repoimple
 @Inject constructor(
     private val firebaseFirestore: FirebaseFirestore,
-    private val firebaseAuth: FirebaseAuth
+    private val firebaseAuth: FirebaseAuth,
+    private val firebaseStorage: FirebaseStorage
 ) : repo {
     override fun getAllCategory(): Flow<State<List<Category>>> = callbackFlow {
 
@@ -64,30 +66,31 @@ class repoimple
 
     }
 
-    override fun userRegisterWithEmailAndPassword(userData: userData): Flow<State<String>> = callbackFlow {
+    override fun userRegisterWithEmailAndPassword(userData: userData): Flow<State<String>> =
+        callbackFlow {
 
-        trySend(State.Loading)
+            trySend(State.Loading)
 
-        firebaseAuth.createUserWithEmailAndPassword(userData.email,userData.password)
-            .addOnSuccessListener {
-                firebaseFirestore.collection("USERS").document(it.user?.uid.toString())
-                    .set(userData)
-                    .addOnSuccessListener {
-                        trySend(State.Success("User Register Successfully"))
-                    }
-                    .addOnFailureListener {
-                        trySend(State.Error(it.toString()))
+            firebaseAuth.createUserWithEmailAndPassword(userData.email, userData.password)
+                .addOnSuccessListener {
+                    firebaseFirestore.collection("USERS").document(it.user?.uid.toString())
+                        .set(userData)
+                        .addOnSuccessListener {
+                            trySend(State.Success("User Register Successfully"))
+                        }
+                        .addOnFailureListener {
+                            trySend(State.Error(it.toString()))
 
-                    }
+                        }
+                }
+                .addOnFailureListener {
+                    trySend(State.Error(it.toString()))
+                }
+            awaitClose {
+                close()
             }
-            .addOnFailureListener {
-                trySend(State.Error(it.toString()))
-            }
-        awaitClose {
-            close()
+
         }
-
-    }
 
     override fun userLoginWithEmailAndPassword(
         userEmail: String,
@@ -103,14 +106,14 @@ class repoimple
             }
         awaitClose {
             close()
-            }
+        }
 
     }
 
     override fun getUserData(): Flow<State<List<userData>>> = callbackFlow {
         trySend(State.Loading)
 
-       val userId = firebaseAuth.currentUser?.uid
+        val userId = firebaseAuth.currentUser?.uid
 
         if (userId == null) {
             trySend(State.Error("User not logged in"))
@@ -155,6 +158,47 @@ class repoimple
             }
 
         awaitClose { close() }
+    }
+
+    override fun updateUserData(userData: userData): Flow<State<String>> = callbackFlow {
+        trySend(State.Loading)
+        val userId = firebaseAuth.currentUser?.uid
+        firebaseFirestore.collection(USERS)
+            .document(userId.toString())
+            .set(userData)
+            .addOnSuccessListener {
+                trySend(State.Success("User data updated successfully"))
+
+            }.addOnFailureListener {
+                trySend(State.Error(it.toString()))
+            }
+        awaitClose {
+            close()
+        }
+
+
+    }
+
+    override fun uploadUserImage(imageUri: Uri): Flow<State<String>> = callbackFlow {
+        trySend(State.Loading)
+        val userId = firebaseAuth.currentUser?.uid
+
+        firebaseStorage.reference.child("UserImage/${System.currentTimeMillis()}" + userId)
+            .putFile(imageUri)
+            .addOnSuccessListener {
+                it.storage.downloadUrl.addOnSuccessListener {
+                    trySend(State.Success(it.toString()))
+                }
+            }
+            .addOnFailureListener {
+                trySend(State.Error(it.toString()))
+            }
+        awaitClose {
+            close()
+
+        }
+
+
     }
 
 

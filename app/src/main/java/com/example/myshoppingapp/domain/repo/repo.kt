@@ -1,5 +1,6 @@
 package com.example.myshoppingapp.domain.repo
 
+import android.net.Uri
 import com.example.myshoppingapp.common.State
 import com.example.myshoppingapp.domain.models.Category
 import com.example.myshoppingapp.domain.models.Product
@@ -19,4 +20,8 @@ interface repo {
     fun getUserData() : Flow<State<List<userData>>>
 
     fun  getProductById(productId: String): Flow<State<Product>>
+
+    fun updateUserData(userData: userData): Flow<State<String>>
+
+    fun uploadUserImage(imageUri: Uri): Flow<State<String>>
 }
