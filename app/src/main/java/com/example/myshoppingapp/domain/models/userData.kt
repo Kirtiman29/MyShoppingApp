@@ -1,5 +1,7 @@
 package com.example.myshoppingapp.domain.models
 
+import android.net.Uri
+
 data class userData (
     var firstName: String ="",
     var lastName: String ="",

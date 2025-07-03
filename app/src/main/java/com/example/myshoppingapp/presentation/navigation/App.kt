@@ -18,8 +18,10 @@ import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
@@ -55,61 +57,62 @@ fun App(
     }
 
     val bottomNavItems = listOf(
-        BottomNavItems(
-            icon = Icons.Filled.Home,
-            unselectedIcon = Icons.Outlined.Home
-        ),
-        BottomNavItems(
-            icon = Icons.Filled.Favorite,
-            unselectedIcon = Icons.Outlined.FavoriteBorder
-        ),
-        BottomNavItems(
-            icon = Icons.Filled.ShoppingCart,
-            unselectedIcon = Icons.Outlined.ShoppingCart
-        ),
-        BottomNavItems(
-            icon = Icons.Filled.Person,
-            unselectedIcon = Icons.Outlined.Person
-        )
+        BottomNavItems(Icons.Filled.Home, Icons.Outlined.Home),
+        BottomNavItems(Icons.Filled.Favorite, Icons.Outlined.FavoriteBorder),
+        BottomNavItems(Icons.Filled.ShoppingCart, Icons.Outlined.ShoppingCart),
+        BottomNavItems(Icons.Filled.Person, Icons.Outlined.Person)
     )
 
     var selectedItemIndex by rememberSaveable { mutableIntStateOf(0) }
 
-    // Get current route to decide if we want bottom bar
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val currentRoute = navBackStackEntry?.destination?.route
 
-    // Define routes where bottom bar should be hidden
-    val bottomBarHiddenRoutes = listOf(
-        Routes.LoginScreen,
-        Routes.SignUpScreen
-    )
+    val shouldBottomBar = rememberSaveable { mutableStateOf(false) }
 
-    // Check if bottom bar should be visible
-    val isBottomBarVisible = bottomBarHiddenRoutes.none { it == currentRoute }
+    LaunchedEffect(currentRoute) {
+        shouldBottomBar.value = when(currentRoute) {
+            Routes.LoginScreen::class.qualifiedName,
+                Routes.SignUpScreen::class.qualifiedName -> false
+            else -> true
+        }
+    }
+
+//    val bottomBarHiddenRoutes = listOf(
+//        Routes.LoginScreen,
+//        Routes.SignUpScreen
+//    )
+
+   // val isBottomBarVisible = currentRoute != null && currentRoute !in bottomBarHiddenRoutes
 
     Scaffold(
         bottomBar = {
-            if (isBottomBarVisible) {
+            if (shouldBottomBar.value) {
                 NavigationBar(
                     containerColor = Color.Transparent,
                     tonalElevation = 0.dp
                 ) {
-                    bottomNavItems.forEachIndexed { index, bottomNavItem ->
+                    bottomNavItems.forEachIndexed { index, item ->
                         NavigationBarItem(
                             selected = selectedItemIndex == index,
                             onClick = {
                                 selectedItemIndex = index
-                                when (index) {
-                                    0 -> navController.navigate(Routes.HomeScreen)
-                                    1 -> navController.navigate(Routes.WishListScreen)
-                                    2 -> navController.navigate(Routes.CartScreen)
-                                    3 -> navController.navigate(Routes.ProfileScreen)
+                                val route = when (index) {
+                                    0 -> Routes.HomeScreen
+                                    1 -> Routes.WishListScreen
+                                    2 -> Routes.CartScreen
+                                    3 -> Routes.ProfileScreen
+                                    else -> Routes.HomeScreen
+                                }
+                                navController.navigate(route) {
+                                    // This clears backstack up to MainHomeScreen to prevent stack piling
+                                    popUpTo(SubNavigation.MainHomeScreen) { inclusive = false }
+                                    launchSingleTop = true
                                 }
                             },
                             icon = {
                                 Icon(
-                                    imageVector = bottomNavItem.unselectedIcon,
+                                    imageVector = if (selectedItemIndex == index) item.icon else item.unselectedIcon,
                                     contentDescription = null,
                                     modifier = Modifier.size(30.dp)
                                 )
@@ -133,29 +136,20 @@ fun App(
                     SignUpScreen(navController = navController)
                 }
             }
-
             navigation<SubNavigation.MainHomeScreen>(startDestination = Routes.HomeScreen) {
                 composable<Routes.HomeScreen> {
-                    HomeScreen(navController = navController)
+                    HomeScreen(navController=navController)
                 }
                 composable<Routes.ProfileScreen> {
-                    ProfileScreen(navController = navController)
+                    ProfileScreen(navController=navController)
                 }
-
-                composable<Routes.SeeMoreScreen>{
-                    SeeMoreScreen(navController = navController)
+                composable<Routes.SeeMoreScreen> {
+                    SeeMoreScreen(navController=navController)
                 }
-
-                composable<Routes.EachProductDetailScreen>{
+                composable<Routes.EachProductDetailScreen> {
                     val data = it.toRoute<Routes.EachProductDetailScreen>()
-                    EachProductDetailScreen(
-                        navController = navController,
-                        productID = data.productId
-                    )
-
+                    EachProductDetailScreen(navController=navController, productID = data.productId)
                 }
-
-
             }
         }
     }

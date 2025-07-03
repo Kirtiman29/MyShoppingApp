@@ -180,26 +180,25 @@ class repoimple
     }
 
     override fun uploadUserImage(imageUri: Uri): Flow<State<String>> = callbackFlow {
-        trySend(State.Loading)
+        trySend(State.Loading)  // emit loading state
+
         val userId = firebaseAuth.currentUser?.uid
 
-        firebaseStorage.reference.child("UserImage/${System.currentTimeMillis()}" + userId)
+        firebaseStorage.reference
+            .child("UserImage/${System.currentTimeMillis()}$userId")
             .putFile(imageUri)
             .addOnSuccessListener {
-                it.storage.downloadUrl.addOnSuccessListener {
-                    trySend(State.Success(it.toString()))
+                it.storage.downloadUrl.addOnSuccessListener { uri ->
+                    trySend(State.Success(uri.toString())) // emit firebase download url
                 }
             }
             .addOnFailureListener {
                 trySend(State.Error(it.toString()))
             }
-        awaitClose {
-            close()
 
-        }
-
-
+        awaitClose { close() }
     }
+
 
 
 }

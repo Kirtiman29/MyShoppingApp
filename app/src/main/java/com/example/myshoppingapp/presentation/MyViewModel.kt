@@ -1,5 +1,6 @@
 package com.example.myshoppingapp.presentation
 
+import android.net.Uri
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.myshoppingapp.common.State
@@ -14,6 +15,7 @@ import com.example.myshoppingapp.domain.useCase.UpdateUserDataUseCase
 import com.example.myshoppingapp.domain.useCase.UploadUserImageUseCase
 import com.example.myshoppingapp.domain.useCase.UserLoginWithEmailAndPasswordUseCase
 import com.example.myshoppingapp.domain.useCase.UserRegisterWithEmailAndPasswordUseCase
+import com.google.firebase.firestore.core.UserData
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -60,6 +62,50 @@ class MyViewModel
 
     val _uploadUserImageState = MutableStateFlow(UploadUserImageState())
     val uploadUserImageState = _uploadUserImageState.asStateFlow()
+
+
+
+    fun updateUserData(userData: userData){
+        viewModelScope.launch {
+            updateUserDataUseCase.updateUserDataUseCase(userData).collectLatest {
+                when(it){
+                    is State.Success -> {
+                        _updateUserDataState.value = UpdateUserDataState(data = it.data)
+                    }
+                    is State.Error -> {
+                        _updateUserDataState.value = UpdateUserDataState(error = it.error)
+                    }
+                    is State.Loading -> {
+                        _updateUserDataState.value = UpdateUserDataState(isLoading = true)
+                    }
+                }
+
+            }
+        }
+    }
+
+
+    fun uploadUserImage(imageUri: Uri){
+        viewModelScope.launch {
+
+            uploadUserImageUseCase.uploadUserImageUseCase(imageUri).collectLatest {
+                when(it) {
+                    is State.Success -> {
+                        _uploadUserImageState.value = UploadUserImageState(data = it.data)
+                    }
+
+                    is State.Error -> {
+                        _uploadUserImageState.value = UploadUserImageState(error = it.error)
+                    }
+
+                    is State.Loading -> {
+                        _uploadUserImageState.value = UploadUserImageState(isLoading = true)
+                    }
+                }
+
+            }
+        }
+    }
 
 
     fun getProductById(productId: String) {
