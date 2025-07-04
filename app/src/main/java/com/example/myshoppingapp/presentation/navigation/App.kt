@@ -34,6 +34,7 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.navigation
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.toRoute
+import com.example.myshoppingapp.presentation.CheckOutScreen
 import com.example.myshoppingapp.presentation.EachProductDetailScreen
 import com.example.myshoppingapp.presentation.HomeScreen
 import com.example.myshoppingapp.presentation.LoginScreen
@@ -150,6 +151,12 @@ fun App(
                     val data = it.toRoute<Routes.EachProductDetailScreen>()
                     EachProductDetailScreen(navController=navController, productID = data.productId)
                 }
+            }
+
+
+            composable<Routes.CheckoutScreen> {
+                val data = it.toRoute<Routes.CheckoutScreen>()
+                CheckOutScreen(navController=navController, productID = data.productId)
             }
         }
     }

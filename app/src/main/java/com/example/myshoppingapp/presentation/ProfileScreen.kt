@@ -48,6 +48,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
@@ -474,7 +475,9 @@ fun CustomLogoutDialog(
                     onClick = onDismissRequest,
                     colors = ButtonDefaults.buttonColors(containerColor = Color.White),
                     border = BorderStroke(1.dp, Color(0xFFF68B8B)),
-                    modifier = Modifier.weight(1f)
+                    modifier = Modifier.width(100.dp)
+                        .height(40.dp)
+                        .clip(RectangleShape)
                 ) {
                     Text("Cancel", color = Color(0xFFF68B8B))
                 }

@@ -61,6 +61,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import coil.compose.AsyncImage
 import com.example.myshoppingapp.domain.models.Product
+import com.example.myshoppingapp.presentation.navigation.Routes
 
 @Composable
 fun EachProductDetailScreen(
@@ -111,7 +112,7 @@ fun EachProductDetailScreen(
             ){
                 LazyColumn {
                     item {
-                        EachProductDetailContnet(product = state.value.data!!)
+                        EachProductDetailContnet(product = state.value.data!!, navController = navController)
                     }
                 }
             }
@@ -126,7 +127,7 @@ fun EachProductDetailScreen(
 }
 
 @Composable
-fun EachProductDetailContnet(product: Product) {
+fun EachProductDetailContnet(product: Product,navController: NavController) {
 
 
     var quantity by rememberSaveable { mutableIntStateOf(1) }
@@ -416,7 +417,10 @@ fun EachProductDetailContnet(product: Product) {
             )
             Spacer(modifier = Modifier.height(10.dp))
             Button(
-                onClick = {},
+                onClick = {
+                    navController.navigate(Routes.CheckoutScreen(productId = product.id))
+
+                },
                 modifier = Modifier
                     .width(317.dp)
                     .height(47.dp),
