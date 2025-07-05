@@ -12,10 +12,16 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
+import androidx.compose.material3.Checkbox
+import androidx.compose.material3.CheckboxDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
@@ -83,7 +89,7 @@ fun CheckOutScreen(
             Box(
                 modifier = Modifier.fillMaxSize()
             ) {
-                LazyColumn{
+                LazyColumn {
                     item {
                         CheckOutContent(product = state.value.data!!)
                     }
@@ -108,6 +114,11 @@ fun CheckOutContent(product: Product) {
     var firstName by rememberSaveable { mutableStateOf("") }
     var lastName by rememberSaveable { mutableStateOf("") }
     var phone by rememberSaveable { mutableStateOf("") }
+
+    var onCheckedChange by rememberSaveable { mutableStateOf(false) }
+
+    var isChecked by rememberSaveable { mutableStateOf(false) }
+    var isCOD by rememberSaveable { mutableStateOf(false) }
 
 
     Column(
@@ -184,7 +195,8 @@ fun CheckOutContent(product: Product) {
             )
             Spacer(modifier = Modifier.height(5.dp))
             Row(
-                modifier = Modifier.fillMaxWidth()
+                modifier = Modifier
+                    .fillMaxWidth()
                     .padding(end = 30.dp),
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
@@ -277,9 +289,6 @@ fun CheckOutContent(product: Product) {
             )
 
 
-
-
-
         }
         Spacer(modifier = Modifier.height(8.dp))
         Row(
@@ -308,7 +317,7 @@ fun CheckOutContent(product: Product) {
 
         OutlinedTextField(
             value = email,
-            onValueChange = {email = it},
+            onValueChange = { email = it },
             label = {
                 Text(
                     text = "Email",
@@ -328,7 +337,6 @@ fun CheckOutContent(product: Product) {
                 unfocusedTextColor = Color.Black,
 
 
-
                 )
 
         )
@@ -343,7 +351,7 @@ fun CheckOutContent(product: Product) {
 
         OutlinedTextField(
             value = country,
-            onValueChange = {country = it},
+            onValueChange = { country = it },
             label = {
                 Text(
                     text = "Country / Region",
@@ -363,19 +371,18 @@ fun CheckOutContent(product: Product) {
                 unfocusedTextColor = Color.Black,
 
 
-
                 )
 
         )
 
-    Spacer(modifier = Modifier.height(8.dp))
+        Spacer(modifier = Modifier.height(8.dp))
         Row(
             modifier = Modifier.fillMaxWidth()
         ) {
 
             OutlinedTextField(
                 value = firstName,
-                onValueChange = {firstName = it},
+                onValueChange = { firstName = it },
                 label = {
                     Text(
                         text = "First Name",
@@ -402,7 +409,7 @@ fun CheckOutContent(product: Product) {
             Spacer(modifier = Modifier.width(15.dp))
             OutlinedTextField(
                 value = lastName,
-                onValueChange = {lastName = it},
+                onValueChange = { lastName = it },
                 label = {
                     Text(
                         text = "Last Name",
@@ -429,7 +436,7 @@ fun CheckOutContent(product: Product) {
         Spacer(modifier = Modifier.height(8.dp))
         OutlinedTextField(
             value = address,
-            onValueChange = {address = it},
+            onValueChange = { address = it },
             label = {
                 Text(
                     text = "Address",
@@ -449,7 +456,6 @@ fun CheckOutContent(product: Product) {
                 unfocusedTextColor = Color.Black,
 
 
-
                 )
 
         )
@@ -460,7 +466,7 @@ fun CheckOutContent(product: Product) {
 
             OutlinedTextField(
                 value = city,
-                onValueChange = {city = it},
+                onValueChange = { city = it },
                 label = {
                     Text(
                         text = "City",
@@ -487,7 +493,7 @@ fun CheckOutContent(product: Product) {
             Spacer(modifier = Modifier.width(15.dp))
             OutlinedTextField(
                 value = pincode,
-                onValueChange = {pincode = it},
+                onValueChange = { pincode = it },
                 label = {
                     Text(
                         text = "Postal code",
@@ -515,7 +521,7 @@ fun CheckOutContent(product: Product) {
         Spacer(modifier = Modifier.height(8.dp))
         OutlinedTextField(
             value = phone,
-            onValueChange = {phone = it},
+            onValueChange = { phone = it },
             label = {
                 Text(
                     text = "Contact number",
@@ -535,18 +541,183 @@ fun CheckOutContent(product: Product) {
                 unfocusedTextColor = Color.Black,
 
 
-
                 )
 
         )
+
+
         Spacer(modifier = Modifier.height(8.dp))
+
+        Row {
+
+
+            Checkbox(
+                checked = onCheckedChange,
+                onCheckedChange = {
+                    onCheckedChange = it
+
+                },
+                modifier = Modifier
+                    .size(15.dp)
+                    .border(1.dp, Color(0xFFD9D9D9), RoundedCornerShape(5.dp)),
+            )
+            Spacer(modifier = Modifier.width(10.dp))
+            Text(
+                text = "Save this information for next time",
+                fontSize = 12.sp,
+                fontWeight = FontWeight.SemiBold,
+                color = Color(0xFF5C5757)
+            )
+        }
+
+        Spacer(modifier = Modifier.height(8.dp))
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(end = 30.dp)
+                .height(80.dp)
+                .border(1.dp, Color(0xFFF68B8B), RoundedCornerShape(10.dp))
+        ) {
+            Column {
+
+
+                Row(
+                    modifier = Modifier.padding(start = 20.dp, top = 6.dp),
+                    horizontalArrangement = Arrangement.SpaceBetween
+                ) {
+                    Text(
+                        text = "Contact",
+                        fontSize = 12.sp,
+                        color = Color(0xFF5C5757),
+                    )
+                    Spacer(modifier = Modifier.width(220.dp))
+                    Text(
+                        text = "Change",
+                        fontSize = 12.sp,
+                        color = Color(0xFF5C5757),
+                    )
+
+                }
+                Spacer(modifier = Modifier.height(8.dp))
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(start = 8.dp, end = 8.dp)
+                        .height(1.dp)
+                        .border(1.dp, Color(0xFF5C5757))
+                )
+
+                Row(
+                    modifier = Modifier.padding(start = 20.dp, top = 10.dp),
+                    horizontalArrangement = Arrangement.SpaceBetween
+                ) {
+                    Text(
+                        text = "Ship to",
+                        fontSize = 12.sp,
+                        color = Color(0xFF5C5757),
+                    )
+                    Spacer(modifier = Modifier.width(220.dp))
+                    Text(
+                        text = "Change",
+                        fontSize = 12.sp,
+                        color = Color(0xFF5C5757),
+                    )
+
+                }
+
+            }
+
+        }
+            Spacer(modifier = Modifier.height(8.dp))
         Text(
-            text = "Save this information for next time",
-            fontSize = 12.sp,
-            fontWeight = FontWeight.SemiBold,
+            text = "Shipping Method",
+            fontSize = 15.sp,
+            fontWeight = FontWeight.Bold,
             color = Color(0xFF5C5757)
+
         )
 
+    Spacer(modifier = Modifier.height(8.dp))
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(end = 30.dp)
+                .height(100.dp)
+                .border(1.dp, Color(0xFFF68B8B), RoundedCornerShape(10.dp))
+        ) {
+            Column {
+
+
+                Row(
+                    modifier = Modifier.padding(start = 20.dp, top = 6.dp),
+                    horizontalArrangement = Arrangement.SpaceBetween
+                ) {
+
+
+                    Text(
+                        text = "Standard FREE delivery over Rs:4500",
+                        fontSize = 12.sp,
+                        color = Color(0xFF5C5757),
+                    )
+                    Spacer(modifier = Modifier.width(70.dp))
+                    Text(
+                        text = "Free",
+                        fontSize = 12.sp,
+                        color = Color(0xFF5C5757),
+                    )
+
+                }
+                Spacer(modifier = Modifier.height(8.dp))
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(start = 8.dp, end = 8.dp)
+                        .height(1.dp)
+                        .border(1.dp, Color(0xFF5C5757))
+                )
+
+                Row(
+                    modifier = Modifier.padding(start = 20.dp, top = 10.dp),
+                    horizontalArrangement = Arrangement.SpaceBetween
+                ) {
+                    Text(
+                        text = "Cash on delivery over Rs: 4500 (Free delivery.\n COD processing free only)",
+                        fontSize = 12.sp,
+                        color = Color(0xFF5C5757),
+                    )
+                    Spacer(modifier = Modifier.width(20.dp))
+                    Text(
+                        text = "100",
+                        fontSize = 12.sp,
+                        color = Color(0xFF5C5757),
+                    )
+
+                }
+
+            }
+
+        }
+
+        Spacer(modifier = Modifier.height(20.dp))
+        Button(
+            onClick = {},
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(end = 30.dp)
+                .height(47.dp),
+            shape = RoundedCornerShape(16.dp),
+            colors = ButtonDefaults.buttonColors(
+                containerColor = Color(0xFF8C8585),
+                contentColor = Color.White
+            )
+
+        ) {
+            Text(
+                text = "Continue to Shipping",
+                fontSize = 15.sp,
+                color = Color.White
+            )
+        }
 
 
     }
