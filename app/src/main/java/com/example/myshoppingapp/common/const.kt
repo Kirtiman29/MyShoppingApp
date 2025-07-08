@@ -9,3 +9,5 @@ const val Products = "Products"
 const val USERS = "USERS"
 
 const val UserImage = "UserImage"
+
+const val  CheckOutDetails = "CheckOutDetails"

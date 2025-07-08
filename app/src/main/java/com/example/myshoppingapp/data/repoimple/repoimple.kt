@@ -2,10 +2,12 @@ package com.example.myshoppingapp.data.repoimple
 
 import android.net.Uri
 import com.example.myshoppingapp.common.CATEGORY
+import com.example.myshoppingapp.common.CheckOutDetails
 import com.example.myshoppingapp.common.Products
 import com.example.myshoppingapp.common.State
 import com.example.myshoppingapp.common.USERS
 import com.example.myshoppingapp.domain.models.Category
+import com.example.myshoppingapp.domain.models.CheckOutDataModels
 import com.example.myshoppingapp.domain.models.Product
 import com.example.myshoppingapp.domain.models.userData
 import com.example.myshoppingapp.domain.repo.repo
@@ -199,6 +201,23 @@ class repoimple
         awaitClose { close() }
     }
 
+    override fun checkOutData(checkOutData: CheckOutDataModels): Flow<State<String>>  = callbackFlow{
+
+        trySend(State.Loading)
+        firebaseFirestore.collection(CheckOutDetails).add(checkOutData)
+            .addOnSuccessListener {
+                trySend(State.Success("Order Placed Successfully"))
+
+            }
+            .addOnFailureListener {
+                trySend(State.Error(it.toString()))
+            }
+        awaitClose{
+            close()
+
+            }
+
+    }
 
 
 }

@@ -3,6 +3,7 @@ package com.example.myshoppingapp.domain.repo
 import android.net.Uri
 import com.example.myshoppingapp.common.State
 import com.example.myshoppingapp.domain.models.Category
+import com.example.myshoppingapp.domain.models.CheckOutDataModels
 import com.example.myshoppingapp.domain.models.Product
 import com.example.myshoppingapp.domain.models.userData
 import kotlinx.coroutines.flow.Flow
@@ -24,4 +25,7 @@ interface repo {
     fun updateUserData(userData: userData): Flow<State<String>>
 
     fun uploadUserImage(imageUri: Uri): Flow<State<String>>
+
+
+    fun checkOutData(checkOutData: CheckOutDataModels): Flow<State<String>>
 }

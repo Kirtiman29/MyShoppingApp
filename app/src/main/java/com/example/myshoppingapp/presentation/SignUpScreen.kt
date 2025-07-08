@@ -100,7 +100,7 @@ fun SignUpScreen(
                 .background(Color(0xFFF68B8B))
         )
 
-        SignUpContent()
+        SignUpContent(navController=navController)
 
 
 
@@ -110,7 +110,8 @@ fun SignUpScreen(
 
 @Composable
 fun SignUpContent(
-    viewModel: MyViewModel = hiltViewModel()
+    viewModel: MyViewModel = hiltViewModel(),
+    navController: NavController
 ) {
 
     var email by remember { mutableStateOf("") }
@@ -329,7 +330,7 @@ fun SignUpContent(
             modifier = Modifier
                 .fillMaxWidth()
                 .clickable {
-                    // Handle click here
+                    navController.navigate(Routes.LoginScreen)
                 },
             textAlign = TextAlign.Center,
             color = Color(0xFF8C8585) // base color for the first part

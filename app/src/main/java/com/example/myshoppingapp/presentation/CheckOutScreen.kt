@@ -1,5 +1,6 @@
 package com.example.myshoppingapp.presentation
 
+import android.util.Log
 import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -25,6 +26,8 @@ import androidx.compose.material3.CheckboxDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
+import androidx.compose.material3.RadioButton
+import androidx.compose.material3.RadioButtonDefaults
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -48,6 +51,7 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import coil.compose.AsyncImage
+import com.example.myshoppingapp.domain.models.CheckOutDataModels
 import com.example.myshoppingapp.domain.models.Product
 
 @Composable
@@ -102,7 +106,7 @@ fun CheckOutScreen(
 
 
 @Composable
-fun CheckOutContent(product: Product) {
+fun CheckOutContent(product: Product, viewModel: MyViewModel = hiltViewModel()) {
 
 
     var email by rememberSaveable { mutableStateOf("") }
@@ -119,6 +123,46 @@ fun CheckOutContent(product: Product) {
 
     var isChecked by rememberSaveable { mutableStateOf(false) }
     var isCOD by rememberSaveable { mutableStateOf(false) }
+
+    val checkOutState = viewModel.checkOutDataState.collectAsState()
+
+    val context = LocalContext.current
+    when{
+        checkOutState.value.isLoading -> {
+            Box(
+                modifier = Modifier.fillMaxSize(),
+                contentAlignment = Alignment.Center
+            ) {
+                CircularProgressIndicator()
+            }
+        }
+        checkOutState.value.error.isNotBlank() -> {
+            Box(
+                modifier = Modifier.fillMaxSize(),
+                contentAlignment = Alignment.Center
+            ) {
+                Text(text = checkOutState.value.error)
+            }
+        }
+        checkOutState.value.data != null -> {
+            Toast.makeText(context, "Order Placed Successfully", Toast.LENGTH_SHORT).show()
+            Log.d("TAG", "CheckOutContent: ${checkOutState.value.data}")
+
+        LaunchedEffect(Unit) {
+            email = ""
+            country = ""
+            address = ""
+            city = ""
+            state = ""
+            pincode = ""
+            firstName = ""
+            lastName = ""
+            phone = ""
+            onCheckedChange = false
+            isCOD = false
+        }
+        }
+    }
 
 
     Column(
@@ -548,7 +592,12 @@ fun CheckOutContent(product: Product) {
 
         Spacer(modifier = Modifier.height(8.dp))
 
-        Row {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(20.dp)
+
+        ) {
 
 
             Checkbox(
@@ -561,7 +610,7 @@ fun CheckOutContent(product: Product) {
                     .size(15.dp)
                     .border(1.dp, Color(0xFFD9D9D9), RoundedCornerShape(5.dp)),
             )
-            Spacer(modifier = Modifier.width(10.dp))
+            Spacer(modifier = Modifier.width(20.dp))
             Text(
                 text = "Save this information for next time",
                 fontSize = 12.sp,
@@ -570,7 +619,7 @@ fun CheckOutContent(product: Product) {
             )
         }
 
-        Spacer(modifier = Modifier.height(8.dp))
+        // Spacer(modifier = Modifier.height(8.dp))
         Box(
             modifier = Modifier
                 .fillMaxWidth()
@@ -628,7 +677,7 @@ fun CheckOutContent(product: Product) {
             }
 
         }
-            Spacer(modifier = Modifier.height(8.dp))
+        Spacer(modifier = Modifier.height(8.dp))
         Text(
             text = "Shipping Method",
             fontSize = 15.sp,
@@ -637,7 +686,7 @@ fun CheckOutContent(product: Product) {
 
         )
 
-    Spacer(modifier = Modifier.height(8.dp))
+        Spacer(modifier = Modifier.height(8.dp))
         Box(
             modifier = Modifier
                 .fillMaxWidth()
@@ -649,20 +698,33 @@ fun CheckOutContent(product: Product) {
 
 
                 Row(
-                    modifier = Modifier.padding(start = 20.dp, top = 6.dp),
-                    horizontalArrangement = Arrangement.SpaceBetween
+                    modifier = Modifier
+                        .padding(start = 20.dp, top = 6.dp, end = 20.dp)
+                        .fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
                 ) {
+                    RadioButton(
+                        selected = isCOD,
+                        onClick = { isCOD = true
+                                  isChecked= false},
+                        colors = RadioButtonDefaults.colors(
+                            selectedColor = Color(0xFFF68B8B),
+                            unselectedColor = Color(0xFF5C5757)
+                        ),
+                        modifier = Modifier.size(5.dp),
 
+                        )
 
                     Text(
                         text = "Standard FREE delivery over Rs:4500",
-                        fontSize = 12.sp,
+                        fontSize = 10.sp,
                         color = Color(0xFF5C5757),
                     )
-                    Spacer(modifier = Modifier.width(70.dp))
+                    // Spacer(modifier = Modifier.width(70.dp))
                     Text(
                         text = "Free",
-                        fontSize = 12.sp,
+                        fontSize = 10.sp,
                         color = Color(0xFF5C5757),
                     )
 
@@ -677,18 +739,34 @@ fun CheckOutContent(product: Product) {
                 )
 
                 Row(
-                    modifier = Modifier.padding(start = 20.dp, top = 10.dp),
-                    horizontalArrangement = Arrangement.SpaceBetween
+                    modifier = Modifier
+                        .padding(start = 20.dp, end = 20.dp)
+                        .fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
                 ) {
+
+                    RadioButton(
+                        selected = isChecked,
+                        onClick = { isChecked = true
+                                  isCOD = false},
+                        colors = RadioButtonDefaults.colors(
+                            selectedColor = Color(0xFFF68B8B),
+                            unselectedColor = Color(0xFF5C5757)
+                        ),
+                        modifier = Modifier.size(5.dp),
+
+                        )
+
                     Text(
                         text = "Cash on delivery over Rs: 4500 (Free delivery.\n COD processing free only)",
-                        fontSize = 12.sp,
+                        fontSize = 10.sp,
                         color = Color(0xFF5C5757),
                     )
-                    Spacer(modifier = Modifier.width(20.dp))
+                    // Spacer(modifier = Modifier.width(20.dp))
                     Text(
                         text = "100",
-                        fontSize = 12.sp,
+                        fontSize = 10.sp,
                         color = Color(0xFF5C5757),
                     )
 
@@ -700,7 +778,23 @@ fun CheckOutContent(product: Product) {
 
         Spacer(modifier = Modifier.height(20.dp))
         Button(
-            onClick = {},
+            onClick = {
+
+                val checkOutData = CheckOutDataModels(
+                    email = email,
+                    country = country,
+                    address = address,
+                    city = city,
+                    state = state,
+                    pincode = pincode,
+                    firstName = firstName,
+                    lastName = lastName,
+                    phone = phone,
+                    isCOD = isCOD
+
+                )
+                viewModel.checkOutData(checkData = checkOutData)
+            },
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(end = 30.dp)

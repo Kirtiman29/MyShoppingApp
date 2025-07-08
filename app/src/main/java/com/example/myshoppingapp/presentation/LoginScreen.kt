@@ -102,7 +102,7 @@ fun LoginScreen(
                 .clip(CircleShape)
                 .background(Color(0xFFF68B8B))
         )
-        LoginContent()
+        LoginContent(navController = navController)
 
 
     }
@@ -112,7 +112,8 @@ fun LoginScreen(
 
 @Composable
 fun LoginContent(
-    viewModel: MyViewModel = hiltViewModel()
+    viewModel: MyViewModel = hiltViewModel(),
+    navController: NavController
 ) {
 
 
@@ -251,7 +252,7 @@ fun LoginContent(
             modifier = Modifier
                 .fillMaxWidth()
                 .clickable {
-                    // Handle click here
+                 navController.navigate(Routes.SignUpScreen)
                 },
             textAlign = TextAlign.Center,
             color = Color(0xFF8C8585) // base color for the first part

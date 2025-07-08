@@ -5,8 +5,10 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.myshoppingapp.common.State
 import com.example.myshoppingapp.domain.models.Category
+import com.example.myshoppingapp.domain.models.CheckOutDataModels
 import com.example.myshoppingapp.domain.models.Product
 import com.example.myshoppingapp.domain.models.userData
+import com.example.myshoppingapp.domain.useCase.CheckOutDataUseCase
 import com.example.myshoppingapp.domain.useCase.GetAllCategoryUseCase
 import com.example.myshoppingapp.domain.useCase.GetAllProductUseCase
 import com.example.myshoppingapp.domain.useCase.GetProductByIdUseCase
@@ -15,7 +17,6 @@ import com.example.myshoppingapp.domain.useCase.UpdateUserDataUseCase
 import com.example.myshoppingapp.domain.useCase.UploadUserImageUseCase
 import com.example.myshoppingapp.domain.useCase.UserLoginWithEmailAndPasswordUseCase
 import com.example.myshoppingapp.domain.useCase.UserRegisterWithEmailAndPasswordUseCase
-import com.google.firebase.firestore.core.UserData
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -34,7 +35,8 @@ class MyViewModel
     private val userLoginWithEmailAndPasswordUseCase: UserLoginWithEmailAndPasswordUseCase,
     private val getProductByIdUseCase: GetProductByIdUseCase,
     private val updateUserDataUseCase: UpdateUserDataUseCase,
-    private val uploadUserImageUseCase: UploadUserImageUseCase
+    private val uploadUserImageUseCase: UploadUserImageUseCase,
+    private val checkOutDataUseCase: CheckOutDataUseCase
 ) : ViewModel() {
 
     val _getAllCategoryState = MutableStateFlow(GetAllCategoryState())
@@ -63,6 +65,26 @@ class MyViewModel
     val _uploadUserImageState = MutableStateFlow(UploadUserImageState())
     val uploadUserImageState = _uploadUserImageState.asStateFlow()
 
+
+    val _checkOutDataState = MutableStateFlow(CheckOutDataState())
+    val checkOutDataState = _checkOutDataState.asStateFlow()
+
+
+
+    fun checkOutData(checkData: CheckOutDataModels){
+        viewModelScope.launch {
+            checkOutDataUseCase.checkOutDataUseCase(checkData).collectLatest {state ->
+                _checkOutDataState.value = when(state){
+                    is State.Success -> CheckOutDataState(data = state.data)
+                    is State.Error -> CheckOutDataState(error = state.error)
+                    is State.Loading -> CheckOutDataState(isLoading = true)
+
+                }
+
+
+            }
+        }
+    }
 
 
     fun updateUserData(userData: userData){
@@ -298,4 +320,10 @@ data class UploadUserImageState(
     val isLoading: Boolean = false,
     val data: String? = null
 
+)
+
+data class CheckOutDataState(
+    val error: String = "",
+    val isLoading: Boolean = false,
+    val data: String? = null
 )
