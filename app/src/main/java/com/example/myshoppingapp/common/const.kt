@@ -11,3 +11,6 @@ const val USERS = "USERS"
 const val UserImage = "UserImage"
 
 const val  CheckOutDetails = "CheckOutDetails"
+
+
+const val UserTokens =  "UserTokens"

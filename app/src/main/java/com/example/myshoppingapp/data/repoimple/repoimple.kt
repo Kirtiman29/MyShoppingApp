@@ -6,6 +6,7 @@ import com.example.myshoppingapp.common.CheckOutDetails
 import com.example.myshoppingapp.common.Products
 import com.example.myshoppingapp.common.State
 import com.example.myshoppingapp.common.USERS
+import com.example.myshoppingapp.common.UserTokens
 import com.example.myshoppingapp.domain.models.Category
 import com.example.myshoppingapp.domain.models.CheckOutDataModels
 import com.example.myshoppingapp.domain.models.Product
@@ -13,6 +14,7 @@ import com.example.myshoppingapp.domain.models.userData
 import com.example.myshoppingapp.domain.repo.repo
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.messaging.FirebaseMessaging
 import com.google.firebase.storage.FirebaseStorage
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
@@ -79,11 +81,13 @@ class repoimple
                         .set(userData)
                         .addOnSuccessListener {
                             trySend(State.Success("User Register Successfully"))
+
                         }
                         .addOnFailureListener {
                             trySend(State.Error(it.toString()))
 
                         }
+                    updateFcmTokens(firebaseAuth.currentUser?.uid.toString())
                 }
                 .addOnFailureListener {
                     trySend(State.Error(it.toString()))
@@ -102,6 +106,7 @@ class repoimple
         firebaseAuth.signInWithEmailAndPassword(userEmail, userPassword)
             .addOnSuccessListener {
                 trySend(State.Success("User Login Successfully"))
+                updateFcmTokens(firebaseAuth.currentUser?.uid.toString())
             }
             .addOnFailureListener {
                 trySend(State.Error(it.message.toString()))
@@ -217,6 +222,20 @@ class repoimple
 
             }
 
+    }
+
+
+    fun updateFcmTokens(userId: String){
+        FirebaseMessaging.getInstance().token.addOnCompleteListener {
+            if (it.isSuccessful){
+                val token = it.result
+                FirebaseFirestore.getInstance().collection(UserTokens).document(userId)
+                    .set(mapOf("token" to token))
+            }
+
+
+
+        }
     }
 
 
