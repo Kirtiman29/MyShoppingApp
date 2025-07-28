@@ -2,7 +2,6 @@ package com.example.myshoppingapp.presentation
 
 import android.util.Log
 import android.widget.Toast
-import androidx.compose.foundation.Image
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -19,7 +18,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.FavoriteBorder
@@ -35,7 +33,6 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -45,11 +42,7 @@ import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.RectangleShape
-import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
@@ -58,10 +51,13 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import coil.compose.AsyncImage
+import com.example.myshoppingapp.domain.models.CartItem
 import com.example.myshoppingapp.domain.models.Product
 import com.example.myshoppingapp.presentation.navigation.Routes
+import kotlinx.coroutines.selects.whileSelect
 
 @Composable
 fun EachProductDetailScreen(
@@ -77,7 +73,9 @@ fun EachProductDetailScreen(
     LaunchedEffect(key1 = Unit) {
         Log.d("ProductScreen", "Fetching product with ID: $productID")
         viewModel.getProductById(productID)
+
     }
+
 
 
     when {
@@ -127,10 +125,31 @@ fun EachProductDetailScreen(
 }
 
 @Composable
-fun EachProductDetailContnet(product: Product,navController: NavController) {
+fun EachProductDetailContnet(product: Product,navController: NavController
+,viewModel: MyViewModel = hiltViewModel()) {
 
+    val cartState = viewModel.addToCardState.collectAsState()
+  val  context = LocalContext.current
 
     var quantity by rememberSaveable { mutableIntStateOf(1) }
+
+    LaunchedEffect(cartState.value) {
+        when {
+            cartState.value.isLoading -> {
+                // Optional: show loading indicator
+            }
+
+            cartState.value.error.isNotBlank() -> {
+                Log.e("CartError", cartState.value.error)
+                Toast.makeText(context, "Error: ${cartState.value.error}", Toast.LENGTH_SHORT)
+                    .show()
+            }
+
+            cartState.value.data != null -> {
+                Toast.makeText(context, cartState.value.data ?: "Added", Toast.LENGTH_SHORT).show()
+            }
+        }
+    }
 
     Column(
         modifier = Modifier.fillMaxSize()
@@ -366,7 +385,7 @@ fun EachProductDetailContnet(product: Product,navController: NavController) {
                     modifier = Modifier
                         .size(50.dp)
                         .clip(RectangleShape)
-                       // .border(1.dp, Color(0xFFF68B8B), RectangleShape)
+                        // .border(1.dp, Color(0xFFF68B8B), RectangleShape)
                         .background(Color(0xFF3DC6AD))
 
 
@@ -440,7 +459,18 @@ fun EachProductDetailContnet(product: Product,navController: NavController) {
         Spacer(modifier = Modifier.height(10.dp))
 
             Button(
-                onClick = {},
+                onClick = {
+                    val cartItem = CartItem(
+                        productId = product.id,
+                        name = product.name,
+                        description = product.description,
+                        price = product.finalprice.toDouble(),
+                        quantity = quantity,
+                        imageUrl = product.imageUri.toString()
+                    )
+                    viewModel.addToCardData(cartItem)
+
+                },
                 modifier = Modifier
                     .width(317.dp)
                     .height(47.dp),

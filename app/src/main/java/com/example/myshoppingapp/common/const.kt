@@ -1,5 +1,6 @@
 package com.example.myshoppingapp.common
 
+import com.example.myshoppingapp.domain.models.CartItem
 
 
 const val CATEGORY  = "CATEGORY"
@@ -14,3 +15,5 @@ const val  CheckOutDetails = "CheckOutDetails"
 
 
 const val UserTokens =  "UserTokens"
+
+const val CartItem = "CardItem"

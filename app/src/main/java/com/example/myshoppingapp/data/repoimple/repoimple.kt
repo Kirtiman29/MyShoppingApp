@@ -2,11 +2,13 @@ package com.example.myshoppingapp.data.repoimple
 
 import android.net.Uri
 import com.example.myshoppingapp.common.CATEGORY
+import com.example.myshoppingapp.common.CartItem
 import com.example.myshoppingapp.common.CheckOutDetails
 import com.example.myshoppingapp.common.Products
 import com.example.myshoppingapp.common.State
 import com.example.myshoppingapp.common.USERS
 import com.example.myshoppingapp.common.UserTokens
+import com.example.myshoppingapp.domain.models.CartItem
 import com.example.myshoppingapp.domain.models.Category
 import com.example.myshoppingapp.domain.models.CheckOutDataModels
 import com.example.myshoppingapp.domain.models.Product
@@ -14,11 +16,14 @@ import com.example.myshoppingapp.domain.models.userData
 import com.example.myshoppingapp.domain.repo.repo
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.firestore.toObject
 import com.google.firebase.messaging.FirebaseMessaging
 import com.google.firebase.storage.FirebaseStorage
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.callbackFlow
+import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.tasks.await
 import javax.inject.Inject
 
 class repoimple
@@ -224,6 +229,50 @@ class repoimple
 
     }
 
+    override fun AddtoCart(cartItem: CartItem): Flow<State<String>> = flow {
+        emit(State.Loading)
+
+        try {
+            val uid = firebaseAuth.currentUser?.uid ?: throw Exception("User not logged in")
+            val cartRef = firebaseFirestore.collection("CartItems").document(uid).collection("Cart")
+            val docRef = cartRef.document(cartItem.productId)
+
+            val document = docRef.get().await()
+
+            if (document.exists()) {
+                val existingQuantity = document.getLong("quantity") ?: 1
+                docRef.update("quantity", existingQuantity + cartItem.quantity).await()
+                emit(State.Success("Quantity updated"))
+            } else {
+                docRef.set(cartItem).await()
+                emit(State.Success("Product added"))
+            }
+        } catch (e: Exception) {
+            emit(State.Error(e.message ?: "Unknown error"))
+        }
+    }
+
+    override fun getCartItem(cartItem: CartItem): Flow<State<List<String>>>  = callbackFlow {
+
+        trySend(State.Loading)
+        val uid = firebaseAuth.currentUser?.uid ?: return@callbackFlow
+
+        firebaseFirestore.collection("CartItems").document(uid).collection("Cart")
+            .get()
+            .addOnSuccessListener {
+                val items = it.documents.mapNotNull { doc->
+                    doc.toObject(CartItem::class.java)
+                }
+                trySend(State.Success(items))
+            }
+            .addOnFailureListener {
+                trySend(State.Error(it.localizedMessage.toString()))
+            }
+        awaitClose {
+            close()
+        }
+
+    }
 
     fun updateFcmTokens(userId: String){
         FirebaseMessaging.getInstance().token.addOnCompleteListener {

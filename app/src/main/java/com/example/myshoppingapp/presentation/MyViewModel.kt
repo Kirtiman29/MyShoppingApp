@@ -4,13 +4,16 @@ import android.net.Uri
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.myshoppingapp.common.State
+import com.example.myshoppingapp.domain.models.CartItem
 import com.example.myshoppingapp.domain.models.Category
 import com.example.myshoppingapp.domain.models.CheckOutDataModels
 import com.example.myshoppingapp.domain.models.Product
 import com.example.myshoppingapp.domain.models.userData
+import com.example.myshoppingapp.domain.useCase.AddToCartDataUseCase
 import com.example.myshoppingapp.domain.useCase.CheckOutDataUseCase
 import com.example.myshoppingapp.domain.useCase.GetAllCategoryUseCase
 import com.example.myshoppingapp.domain.useCase.GetAllProductUseCase
+import com.example.myshoppingapp.domain.useCase.GetCartItemDataUseCase
 import com.example.myshoppingapp.domain.useCase.GetProductByIdUseCase
 import com.example.myshoppingapp.domain.useCase.GetUserDataUseCase
 import com.example.myshoppingapp.domain.useCase.UpdateUserDataUseCase
@@ -36,7 +39,9 @@ class MyViewModel
     private val getProductByIdUseCase: GetProductByIdUseCase,
     private val updateUserDataUseCase: UpdateUserDataUseCase,
     private val uploadUserImageUseCase: UploadUserImageUseCase,
-    private val checkOutDataUseCase: CheckOutDataUseCase
+    private val checkOutDataUseCase: CheckOutDataUseCase,
+    private val addToCartDataUseCase: AddToCartDataUseCase,
+    private val getCartItemDataUseCase: GetCartItemDataUseCase
 ) : ViewModel() {
 
     val _getAllCategoryState = MutableStateFlow(GetAllCategoryState())
@@ -69,7 +74,39 @@ class MyViewModel
     val _checkOutDataState = MutableStateFlow(CheckOutDataState())
     val checkOutDataState = _checkOutDataState.asStateFlow()
 
+    val _addToCardState = MutableStateFlow(AddToCardState())
+    val addToCardState = _addToCardState.asStateFlow()
 
+    val _getCartItemState = MutableStateFlow(GetCartItem())
+
+    val getCartItemState = _getCartItemState.asStateFlow()
+
+
+    fun getCartItem(cartItem: CartItem){
+        viewModelScope.launch {
+            getCartItemDataUseCase.getCartItemDataUseCase(cartItem).collectLatest { state->
+                _getCartItemState.value = when(state){
+                    is State.Success -> GetCartItem(data = state.data)
+                    is State.Error -> GetCartItem(error = state.error)
+                    is State.Loading -> GetCartItem(isLoading = true)
+                }
+            }
+        }
+    }
+
+
+
+    fun addToCardData(cartItem: CartItem){
+        viewModelScope.launch {
+            addToCartDataUseCase.addToCartDataUseCase(cartItem).collectLatest { state->
+                _addToCardState.value = when(state){
+                    is State.Success -> AddToCardState(data = state.data)
+                    is State.Error -> AddToCardState(error = state.error)
+                    is State.Loading -> AddToCardState(isLoading = true)
+                }
+            }
+        }
+    }
 
     fun checkOutData(checkData: CheckOutDataModels){
         viewModelScope.launch {
@@ -200,6 +237,27 @@ class MyViewModel
     }
 
 
+    fun getCartItem(){
+        viewModelScope.launch {
+            getCartItemDataUseCase.getCartItemDataUseCase(cartItem = CartItem()).collectLatest {
+                when (it) {
+                    is State.Success -> {
+                        _getCartItemState.value = GetCartItem(data = it.data)
+                    }
+
+                    is State.Error -> {
+                        _getCartItemState.value = GetCartItem(error = it.error)
+                    }
+
+                    is State.Loading -> {
+                        _getCartItemState.value = GetCartItem(isLoading = true)
+                    }
+                }
+
+            }
+        }
+    }
+
     fun registerUser(userData: userData) {
         viewModelScope.launch {
             userRegisterWithEmailAndPasswordUseCase.userRegisterWithEmailAndPasswordUseCase(userData)
@@ -326,4 +384,17 @@ data class CheckOutDataState(
     val error: String = "",
     val isLoading: Boolean = false,
     val data: String? = null
+)
+
+data class AddToCardState(
+    val error: String = "",
+    val isLoading: Boolean = false,
+    val data: String? = null
+
+)
+
+data class GetCartItem(
+    val error: String = "",
+    val isLoading: Boolean = false,
+    val data: List<String> = emptyList()
 )

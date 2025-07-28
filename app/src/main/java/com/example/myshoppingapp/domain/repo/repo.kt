@@ -2,6 +2,7 @@ package com.example.myshoppingapp.domain.repo
 
 import android.net.Uri
 import com.example.myshoppingapp.common.State
+import com.example.myshoppingapp.domain.models.CartItem
 import com.example.myshoppingapp.domain.models.Category
 import com.example.myshoppingapp.domain.models.CheckOutDataModels
 import com.example.myshoppingapp.domain.models.Product
@@ -28,4 +29,8 @@ interface repo {
 
 
     fun checkOutData(checkOutData: CheckOutDataModels): Flow<State<String>>
+
+    fun AddtoCart(cartItem: CartItem): Flow<State<String>>
+
+    fun getCartItem(cartItem: CartItem): Flow<State<List<String>>>
 }
