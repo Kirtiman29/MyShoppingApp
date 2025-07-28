@@ -162,7 +162,7 @@ fun App(
 
             composable<Routes.CartScreen> {
                 val data = it.toRoute<Routes.CartScreen>()
-                AddToCartScreen(navController=navController, cartItem = data.cartItem)
+                AddToCartScreen(navController=navController)
 
             }
         }
