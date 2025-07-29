@@ -16,4 +16,3 @@ const val  CheckOutDetails = "CheckOutDetails"
 
 const val UserTokens =  "UserTokens"
 
-const val CartItem = "CardItem"

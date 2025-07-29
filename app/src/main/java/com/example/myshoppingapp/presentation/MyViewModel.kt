@@ -82,19 +82,6 @@ class MyViewModel
     val getCartItemState = _getCartItemState.asStateFlow()
 
 
-    fun getCartItem(cartItem: CartItem){
-        viewModelScope.launch {
-            getCartItemDataUseCase.getCartItemDataUseCase(cartItem).collectLatest { state->
-                _getCartItemState.value = when(state){
-                    is State.Success -> GetCartItem(data = state.data)
-                    is State.Error -> GetCartItem(error = state.error)
-                    is State.Loading -> GetCartItem(isLoading = true)
-                }
-            }
-        }
-    }
-
-
 
     fun addToCardData(cartItem: CartItem){
         viewModelScope.launch {
@@ -239,7 +226,7 @@ class MyViewModel
 
     fun getCartItem(){
         viewModelScope.launch {
-            getCartItemDataUseCase.getCartItemDataUseCase(cartItem = CartItem()).collectLatest {
+            getCartItemDataUseCase.getCartItemDataUseCase().collectLatest {
                 when (it) {
                     is State.Success -> {
                         _getCartItemState.value = GetCartItem(data = it.data)
@@ -396,5 +383,5 @@ data class AddToCardState(
 data class GetCartItem(
     val error: String = "",
     val isLoading: Boolean = false,
-    val data: List<String> = emptyList()
+    val data: List<CartItem> = emptyList()
 )

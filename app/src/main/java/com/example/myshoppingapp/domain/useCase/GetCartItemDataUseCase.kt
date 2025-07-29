@@ -6,5 +6,6 @@ import javax.inject.Inject
 
 class GetCartItemDataUseCase @Inject constructor(private val repo: repo) {
 
-    fun getCartItemDataUseCase(cartItem: CartItem) = repo.getCartItem(cartItem)
+    fun getCartItemDataUseCase() = repo.getCartItem()
+
 }

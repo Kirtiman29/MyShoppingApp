@@ -32,5 +32,5 @@ interface repo {
 
     fun AddtoCart(cartItem: CartItem): Flow<State<String>>
 
-    fun getCartItem(cartItem: CartItem): Flow<State<List<String>>>
+    fun getCartItem(): Flow<State<List<CartItem>>>
 }

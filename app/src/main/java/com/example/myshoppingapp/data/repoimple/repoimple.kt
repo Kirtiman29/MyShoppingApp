@@ -1,8 +1,8 @@
 package com.example.myshoppingapp.data.repoimple
 
 import android.net.Uri
+import android.util.Log
 import com.example.myshoppingapp.common.CATEGORY
-import com.example.myshoppingapp.common.CartItem
 import com.example.myshoppingapp.common.CheckOutDetails
 import com.example.myshoppingapp.common.Products
 import com.example.myshoppingapp.common.State
@@ -25,6 +25,7 @@ import kotlinx.coroutines.flow.callbackFlow
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.tasks.await
 import javax.inject.Inject
+import kotlin.text.get
 
 class repoimple
 @Inject constructor(
@@ -74,6 +75,7 @@ class repoimple
         }
 
     }
+
 
     override fun userRegisterWithEmailAndPassword(userData: userData): Flow<State<String>> =
         callbackFlow {
@@ -211,23 +213,24 @@ class repoimple
         awaitClose { close() }
     }
 
-    override fun checkOutData(checkOutData: CheckOutDataModels): Flow<State<String>>  = callbackFlow{
+    override fun checkOutData(checkOutData: CheckOutDataModels): Flow<State<String>> =
+        callbackFlow {
 
-        trySend(State.Loading)
-        firebaseFirestore.collection(CheckOutDetails).add(checkOutData)
-            .addOnSuccessListener {
-                trySend(State.Success("Order Placed Successfully"))
+            trySend(State.Loading)
+            firebaseFirestore.collection(CheckOutDetails).add(checkOutData)
+                .addOnSuccessListener {
+                    trySend(State.Success("Order Placed Successfully"))
+
+                }
+                .addOnFailureListener {
+                    trySend(State.Error(it.toString()))
+                }
+            awaitClose {
+                close()
 
             }
-            .addOnFailureListener {
-                trySend(State.Error(it.toString()))
-            }
-        awaitClose{
-            close()
 
-            }
-
-    }
+        }
 
     override fun AddtoCart(cartItem: CartItem): Flow<State<String>> = flow {
         emit(State.Loading)
@@ -252,36 +255,42 @@ class repoimple
         }
     }
 
-    override fun getCartItem(cartItem: CartItem): Flow<State<List<String>>>  = callbackFlow {
+    override fun getCartItem(): Flow<State<List<CartItem>>>  = callbackFlow{
 
         trySend(State.Loading)
-        val uid = firebaseAuth.currentUser?.uid ?: return@callbackFlow
 
-        firebaseFirestore.collection("CartItems").document(uid).collection("Cart")
+        val userId = firebaseAuth.currentUser?.uid
+
+        if (userId == null) {
+            trySend(State.Error("User not logged in"))
+            close() // Close the flow since we can't continue
+            return@callbackFlow
+        }
+        firebaseFirestore.collection("CartItems").document(userId).collection("Cart")
             .get()
-            .addOnSuccessListener {
-                val items = it.documents.mapNotNull { doc->
-                    doc.toObject(CartItem::class.java)
+            .addOnSuccessListener { querySnapshot ->
+                val cartItems = querySnapshot.documents.mapNotNull {
+                    it.toObject(CartItem::class.java)
                 }
-                trySend(State.Success(items))
+                trySend(State.Success(cartItems))
             }
             .addOnFailureListener {
-                trySend(State.Error(it.localizedMessage.toString()))
+                trySend(State.Error(it.localizedMessage ?: "Unknown error"))
+
             }
-        awaitClose {
-            close()
-        }
+        awaitClose { close() }
+
 
     }
 
-    fun updateFcmTokens(userId: String){
+
+    fun updateFcmTokens(userId: String) {
         FirebaseMessaging.getInstance().token.addOnCompleteListener {
-            if (it.isSuccessful){
+            if (it.isSuccessful) {
                 val token = it.result
                 FirebaseFirestore.getInstance().collection(UserTokens).document(userId)
                     .set(mapOf("token" to token))
             }
-
 
 
         }
