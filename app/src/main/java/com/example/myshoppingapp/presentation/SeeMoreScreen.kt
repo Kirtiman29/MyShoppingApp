@@ -220,5 +220,6 @@ fun ProductCont(product: Product) {
             )
         }
     }
+
     Spacer(modifier = Modifier.height(12.dp))
 }
