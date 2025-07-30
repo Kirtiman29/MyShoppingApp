@@ -8,14 +8,18 @@ import com.example.myshoppingapp.domain.models.CartItem
 import com.example.myshoppingapp.domain.models.Category
 import com.example.myshoppingapp.domain.models.CheckOutDataModels
 import com.example.myshoppingapp.domain.models.Product
+import com.example.myshoppingapp.domain.models.WatchlistItem
 import com.example.myshoppingapp.domain.models.userData
 import com.example.myshoppingapp.domain.useCase.AddToCartDataUseCase
+import com.example.myshoppingapp.domain.useCase.AddToWatchlistUseCase
 import com.example.myshoppingapp.domain.useCase.CheckOutDataUseCase
 import com.example.myshoppingapp.domain.useCase.GetAllCategoryUseCase
 import com.example.myshoppingapp.domain.useCase.GetAllProductUseCase
 import com.example.myshoppingapp.domain.useCase.GetCartItemDataUseCase
 import com.example.myshoppingapp.domain.useCase.GetProductByIdUseCase
 import com.example.myshoppingapp.domain.useCase.GetUserDataUseCase
+import com.example.myshoppingapp.domain.useCase.GetWatchListUseCase
+import com.example.myshoppingapp.domain.useCase.RemoveFromWatchListUseCase
 import com.example.myshoppingapp.domain.useCase.UpdateUserDataUseCase
 import com.example.myshoppingapp.domain.useCase.UploadUserImageUseCase
 import com.example.myshoppingapp.domain.useCase.UserLoginWithEmailAndPasswordUseCase
@@ -41,7 +45,11 @@ class MyViewModel
     private val uploadUserImageUseCase: UploadUserImageUseCase,
     private val checkOutDataUseCase: CheckOutDataUseCase,
     private val addToCartDataUseCase: AddToCartDataUseCase,
-    private val getCartItemDataUseCase: GetCartItemDataUseCase
+    private val getCartItemDataUseCase: GetCartItemDataUseCase,
+    private val addToWatchListUseCase: AddToWatchlistUseCase,
+    private val getWatchListUseCase: GetWatchListUseCase,
+    private val removeFromWatchListUseCase: RemoveFromWatchListUseCase
+
 ) : ViewModel() {
 
     val _getAllCategoryState = MutableStateFlow(GetAllCategoryState())
@@ -80,6 +88,84 @@ class MyViewModel
     val _getCartItemState = MutableStateFlow(GetCartItem())
 
     val getCartItemState = _getCartItemState.asStateFlow()
+
+
+    val _watchListState = MutableStateFlow(WatchListState())
+    val watchListState = _watchListState.asStateFlow()
+
+    val _getWatchListState = MutableStateFlow(GetWatchListState())
+    val getWatchListState = _getWatchListState.asStateFlow()
+
+
+    val _removeFromWatchListState = MutableStateFlow(RemoveWatchListState())
+    val removeFromWatchListState = _removeFromWatchListState.asStateFlow()
+
+
+    fun removeFromWatchList(productId: String){
+        viewModelScope.launch {
+            removeFromWatchListUseCase.removeFromWatchListUseCase(productId).collectLatest {
+
+                when(it){
+
+                    is State.Success ->{
+                        _removeFromWatchListState.value = RemoveWatchListState(data = it.data)
+                    }
+                    is State.Error ->{
+                        _removeFromWatchListState.value = RemoveWatchListState(error = it.error)
+                    }
+                    is State.Loading ->{
+                        _removeFromWatchListState.value = RemoveWatchListState(isLoading = true)
+                    }
+
+                }
+
+            }
+
+        }
+    }
+
+
+
+
+    fun getWatchList(){
+        viewModelScope.launch {
+            getWatchListUseCase.getWatchListUseCase().collectLatest {
+
+                when(it){
+                    is State.Success ->{
+                        _getWatchListState.value = GetWatchListState(data = it.data)
+                    }
+                    is State.Error ->{
+                        _getWatchListState.value = GetWatchListState(error = it.error)
+                    }
+                    is State.Loading ->{
+                        _getWatchListState.value = GetWatchListState(isLoading = true)
+                    }
+
+                }
+            }
+        }
+    }
+
+    fun addToWatchList(watchListItems: WatchlistItem){
+
+        viewModelScope.launch {
+
+            addToWatchListUseCase.addToWatchlistUseCase(watchListItems).collectLatest { state ->
+                when(state){
+                    is State.Success ->{
+                        _watchListState.value = WatchListState(data = state.data)
+                    }
+                    is State.Error ->{
+                        _watchListState.value = WatchListState(error = state.error)
+                    }
+                    is State.Loading ->{
+                        _watchListState.value = WatchListState(isLoading = true)
+                    }
+                }
+            }
+        }
+    }
 
 
 
@@ -384,4 +470,24 @@ data class GetCartItem(
     val error: String = "",
     val isLoading: Boolean = false,
     val data: List<CartItem> = emptyList()
+)
+
+data class WatchListState(
+    val error: String = "",
+    val isLoading: Boolean = false,
+    val data: String? = null
+
+)
+
+data class GetWatchListState(
+    val error: String = "",
+    val isLoading: Boolean = false,
+    val data: List<WatchlistItem> = emptyList()
+
+)
+
+data class RemoveWatchListState(
+    val error: String = "",
+    val isLoading: Boolean = false,
+    val data: String? = null
 )

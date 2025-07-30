@@ -12,6 +12,7 @@ import com.example.myshoppingapp.domain.models.CartItem
 import com.example.myshoppingapp.domain.models.Category
 import com.example.myshoppingapp.domain.models.CheckOutDataModels
 import com.example.myshoppingapp.domain.models.Product
+import com.example.myshoppingapp.domain.models.WatchlistItem
 import com.example.myshoppingapp.domain.models.userData
 import com.example.myshoppingapp.domain.repo.repo
 import com.google.firebase.auth.FirebaseAuth
@@ -255,7 +256,7 @@ class repoimple
         }
     }
 
-    override fun getCartItem(): Flow<State<List<CartItem>>>  = callbackFlow{
+    override fun getCartItem(): Flow<State<List<CartItem>>> = callbackFlow {
 
         trySend(State.Loading)
 
@@ -279,6 +280,72 @@ class repoimple
 
             }
         awaitClose { close() }
+
+
+    }
+
+    override fun addToWatchList(watchListItems: WatchlistItem): Flow<State<String>> = callbackFlow {
+
+        trySend(State.Loading)
+
+        val userId = firebaseAuth.currentUser?.uid.toString()
+        firebaseFirestore.collection("WatchListItems").document(userId)
+            .collection("WatchList")
+            .document(watchListItems.productId)
+            .set(watchListItems)
+            .addOnSuccessListener {
+                trySend(State.Success("Product added to watchlist"))
+            }.addOnFailureListener {
+                trySend(State.Error(it.toString()))
+            }
+
+        awaitClose { close() }
+
+    }
+
+    override fun getWatchList(): Flow<State<List<WatchlistItem>>> = callbackFlow{
+
+        trySend(State.Loading)
+
+        val userId = firebaseAuth.currentUser?.uid.toString()
+
+        firebaseFirestore.collection("WatchListItems").document(userId)
+            .collection("WatchList")
+            .get()
+            .addOnSuccessListener { querySnapshot ->
+
+                val items = querySnapshot.documents.mapNotNull { document ->
+                    document.toObject(WatchlistItem::class.java)
+
+                }
+                trySend(State.Success(items))
+            }
+            .addOnFailureListener {
+                trySend(State.Error(it.toString()))
+
+            }
+        awaitClose { close() }
+
+    }
+
+    override fun removeFromWatchList(productId: String): Flow<State<String>> = callbackFlow{
+
+        trySend(State.Loading)
+
+        val userId = firebaseAuth.currentUser?.uid.toString()
+
+        firebaseFirestore.collection("WatchListItems").document(userId)
+            .collection("WatchList")
+            .document(productId)
+            .delete()
+            .addOnSuccessListener {
+                trySend(State.Success("Product removed from watchlist"))
+            }
+            .addOnFailureListener {
+                trySend(State.Error(it.toString()))
+            }
+        awaitClose { close() }
+
 
 
     }

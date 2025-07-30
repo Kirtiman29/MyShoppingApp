@@ -51,13 +51,12 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
-import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import coil.compose.AsyncImage
 import com.example.myshoppingapp.domain.models.CartItem
 import com.example.myshoppingapp.domain.models.Product
+import com.example.myshoppingapp.domain.models.WatchlistItem
 import com.example.myshoppingapp.presentation.navigation.Routes
-import kotlinx.coroutines.selects.whileSelect
 
 @Composable
 fun EachProductDetailScreen(
@@ -131,6 +130,8 @@ fun EachProductDetailContnet(product: Product,navController: NavController
     val cartState = viewModel.addToCardState.collectAsState()
   val  context = LocalContext.current
 
+    val watchListState = viewModel.watchListState.collectAsState()
+
     var quantity by rememberSaveable { mutableIntStateOf(1) }
 
     LaunchedEffect(cartState.value) {
@@ -148,6 +149,21 @@ fun EachProductDetailContnet(product: Product,navController: NavController
             cartState.value.data != null -> {
                 Toast.makeText(context, cartState.value.data ?: "Added", Toast.LENGTH_SHORT).show()
             }
+        }
+    }
+
+    LaunchedEffect(watchListState.value){
+        when{
+            watchListState.value.isLoading -> {
+                // Optional: show loading indicator
+            }
+            watchListState.value.error.isNotBlank() -> {
+                Log.e("WatchListError", watchListState.value.error)
+            }
+            watchListState.value.data != null -> {
+                Toast.makeText(context, watchListState.value.data ?: "Added", Toast.LENGTH_SHORT).show()
+            }
+
         }
     }
 
@@ -490,7 +506,18 @@ fun EachProductDetailContnet(product: Product,navController: NavController
 
         Spacer(modifier = Modifier.height(10.dp))
             Button(
-                onClick = {},
+                onClick = {
+                    val watchItem = WatchlistItem(
+                        productId = product.id,
+                        name = product.name,
+                        description = product.description,
+                        price = product.finalprice.toDouble(),
+                        imageUrl = product.imageUri.toString()
+                    )
+
+                    viewModel.addToWatchList(watchListItems = watchItem)
+
+                },
                 modifier = Modifier
                     .width(317.dp)
                     .height(47.dp),

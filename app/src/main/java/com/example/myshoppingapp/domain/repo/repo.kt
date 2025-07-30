@@ -6,6 +6,7 @@ import com.example.myshoppingapp.domain.models.CartItem
 import com.example.myshoppingapp.domain.models.Category
 import com.example.myshoppingapp.domain.models.CheckOutDataModels
 import com.example.myshoppingapp.domain.models.Product
+import com.example.myshoppingapp.domain.models.WatchlistItem
 import com.example.myshoppingapp.domain.models.userData
 import kotlinx.coroutines.flow.Flow
 
@@ -33,4 +34,14 @@ interface repo {
     fun AddtoCart(cartItem: CartItem): Flow<State<String>>
 
     fun getCartItem(): Flow<State<List<CartItem>>>
+
+
+    fun addToWatchList(watchListItems: WatchlistItem): Flow<State<String>>
+
+    fun getWatchList(): Flow<State<List<WatchlistItem>>>
+
+
+    fun removeFromWatchList(productId: String): Flow<State<String>>
+
+
 }

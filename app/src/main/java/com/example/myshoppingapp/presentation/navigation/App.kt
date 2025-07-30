@@ -42,6 +42,7 @@ import com.example.myshoppingapp.presentation.LoginScreen
 import com.example.myshoppingapp.presentation.ProfileScreen
 import com.example.myshoppingapp.presentation.SeeMoreScreen
 import com.example.myshoppingapp.presentation.SignUpScreen
+import com.example.myshoppingapp.presentation.WatchListScreen
 import com.google.firebase.auth.FirebaseAuth
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.launch
@@ -164,6 +165,10 @@ fun App(
                 val data = it.toRoute<Routes.CartScreen>()
                 AddToCartScreen(navController=navController)
 
+            }
+
+            composable<Routes.WishListScreen>{
+                WatchListScreen(navController = navController)
             }
         }
     }
